@@ -1,0 +1,173 @@
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--gradiente-fundo);
+}
+
+// Grade de fundo
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,200,240,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,240,0.04) 1px, transparent 1px);
+  background-size: 100px 100px;
+  pointer-events: none;
+}
+
+// Linhas decorativas diagonais
+.deco-line {
+  position: absolute;
+  width: 2px;
+  height: 60vh;
+  background: linear-gradient(to bottom, transparent, rgba(0,200,240,0.3), transparent);
+  pointer-events: none;
+}
+.deco-line-1 { left: 20%; top: 10%; transform: rotate(30deg); }
+.deco-line-2 { right: 20%; top: 10%; transform: rotate(-30deg); }
+
+// Card
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 48px 40px;
+  z-index: 1;
+}
+
+// Logo
+.logo-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.logo-v {
+  width: 56px;
+  height: 48px;
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
+  margin-bottom: 12px;
+}
+
+.logo-texto {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--cor-texto);
+  margin: 0 0 8px 0;
+  filter: drop-shadow(0 0 6px rgba(255,255,255,0.3));
+}
+
+.logo-linha {
+  width: 160px;
+  height: 1px;
+  background: var(--cor-primaria);
+  opacity: 0.6;
+  margin-bottom: 8px;
+}
+
+.logo-subtitulo {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--cor-primaria);
+  opacity: 0.8;
+  margin: 0;
+}
+
+// Formulário
+.form-login {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+// Campos Material estilizados
+.campo-tlb {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-form-field-flex {
+      background: var(--cor-fundo-input);
+      border-radius: var(--raio-input);
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--cor-borda) !important;
+    }
+
+    &:hover .mdc-notched-outline__leading,
+    &:hover .mdc-notched-outline__notch,
+    &:hover .mdc-notched-outline__trailing {
+      border-color: var(--cor-borda-hover) !important;
+    }
+
+    .mdc-floating-label, .mat-mdc-floating-label {
+      color: var(--cor-primaria) !important;
+      opacity: 0.8;
+    }
+
+    input {
+      color: var(--cor-texto) !important;
+      caret-color: var(--cor-primaria);
+    }
+
+    .mat-mdc-form-field-icon-suffix .mat-icon,
+    .mat-icon {
+      color: var(--cor-primaria);
+      opacity: 0.7;
+    }
+  }
+}
+
+.esqueceu {
+  text-align: right;
+  margin-top: -4px;
+  margin-bottom: 8px;
+
+  a {
+    font-size: 12px;
+    color: var(--cor-primaria);
+    opacity: 0.7;
+    text-decoration: none;
+
+    &:hover { opacity: 1; }
+  }
+}
+
+.erro-msg {
+  color: #ff5252;
+  font-size: 13px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.btn-entrar {
+  width: 100%;
+  height: 44px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.cadastro-link {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--cor-texto-placeholder);
+
+  a {
+    color: var(--cor-primaria);
+    text-decoration: none;
+    font-weight: 600;
+
+    &:hover { opacity: 0.8; }
+  }
+}

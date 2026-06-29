@@ -1,1 +1,83 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+// ─── Reset e base ───────────────────────────────────────
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// ─── Variáveis TLB TECH ─────────────────────────────────
+:root {
+  --cor-fundo:        #050e1a;
+  --cor-fundo-card:   #0d2340;
+  --cor-fundo-input:  #0d2a45;
+  --cor-primaria:     #00c8f0;
+  --cor-primaria-hover: #00e5ff;
+  --cor-texto:        #ffffff;
+  --cor-texto-secundario: #e0e0e0;
+  --cor-texto-placeholder: #4a7a9b;
+  --cor-borda:        rgba(0, 200, 240, 0.4);
+  --cor-borda-hover:  rgba(0, 200, 240, 0.8);
+  --sombra-card:      0 8px 32px rgba(0, 200, 240, 0.15);
+  --raio-card:        16px;
+  --raio-input:       8px;
+  --gradiente-btn:    linear-gradient(90deg, #00c8f0, #0090c8);
+  --gradiente-fundo:  linear-gradient(135deg, #050e1a 0%, #0a1e35 50%, #071525 100%);
+}
+
+// ─── Tema Angular Material ──────────────────────────────
+html {
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$cyan-palette,
+    ),
+    typography: Roboto,
+    density: 0
+  ));
+}
+
+// ─── Corpo da página ────────────────────────────────────
+html, body {
+  height: 100%;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--gradiente-fundo);
+  background-attachment: fixed;
+  color: var(--cor-texto);
+  min-height: 100vh;
+}
+
+// ─── Utilitários globais ─────────────────────────────────
+.tlb-card {
+  background: var(--cor-fundo-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  box-shadow: var(--sombra-card);
+  position: relative;
+
+  // Linha ciano no topo do card (igual ao mockup)
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--cor-primaria);
+    border-radius: var(--raio-card) var(--raio-card) 0 0;
+    opacity: 0.8;
+  }
+}
+
+.tlb-btn-primary {
+  background: var(--gradiente-btn) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(0, 229, 255, 0.5) !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
+  border-radius: var(--raio-input) !important;
+
+  &:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 0 16px rgba(0, 200, 240, 0.4);
+  }
+}
