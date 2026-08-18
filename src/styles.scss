@@ -1,1 +1,322 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+// ─── Reset e base ───────────────────────────────────────
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// ─── Variáveis TLB TECH ─────────────────────────────────
+:root {
+  // Faz o navegador desenhar controles nativos (dropdown do <select>, calendário
+  // do input[type=date], ícones de picker, scrollbar) no tema escuro em vez do
+  // branco padrão do sistema — o app não tem versão clara.
+  color-scheme: dark;
+
+  --cor-fundo:        #050e1a;
+  --cor-fundo-card:   #0d2340;
+  --cor-fundo-input:  #0d2a45;
+  --cor-primaria:     #00c8f0;
+  --cor-primaria-hover: #00e5ff;
+  --cor-texto:        #ffffff;
+  --cor-texto-secundario: #e0e0e0;
+  --cor-texto-placeholder: #4a7a9b;
+  --cor-borda:        rgba(0, 200, 240, 0.4);
+  --cor-borda-hover:  rgba(0, 200, 240, 0.8);
+  --sombra-card:      0 8px 32px rgba(0, 200, 240, 0.15);
+  --raio-card:        16px;
+  --raio-input:       8px;
+  --gradiente-btn:    linear-gradient(90deg, #00c8f0, #0090c8);
+  --gradiente-fundo:  linear-gradient(135deg, #050e1a 0%, #0a1e35 50%, #071525 100%);
+}
+
+// ─── Tema Angular Material ──────────────────────────────
+html {
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$cyan-palette,
+    ),
+    typography: Roboto,
+    density: 0
+  ));
+}
+
+// ─── Corpo da página ────────────────────────────────────
+html, body {
+  height: 100%;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--gradiente-fundo);
+  background-attachment: fixed;
+  color: var(--cor-texto);
+  min-height: 100vh;
+}
+
+// ─── Utilitários globais ─────────────────────────────────
+.tlb-card {
+  background: var(--cor-fundo-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  box-shadow: var(--sombra-card);
+  position: relative;
+
+  // Linha ciano no topo do card (igual ao mockup)
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--cor-primaria);
+    border-radius: var(--raio-card) var(--raio-card) 0 0;
+    opacity: 0.8;
+  }
+}
+
+// ─── Dialog TLB ─────────────────────────────────────────
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(0, 200, 240, 0.1);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--cor-primaria);
+    border-radius: var(--raio-card) var(--raio-card) 0 0;
+    opacity: 0.8;
+  }
+}
+
+.dialog-title {
+  color: var(--cor-primaria);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dialog-close-btn {
+  background: transparent;
+  border: none;
+  color: #4a7a9b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: color 0.2s;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  &:hover { color: #ff5252; }
+}
+
+.tlb-dialog .mdc-dialog__surface {
+  background: var(--cor-fundo-card) !important;
+  border: 1px solid var(--cor-borda) !important;
+  border-radius: var(--raio-card) !important;
+  box-shadow: var(--sombra-card) !important;
+  padding: 0 !important;
+}
+
+.tlb-dialog .mat-mdc-dialog-content {
+  padding: 16px 24px 8px !important;
+  max-height: 70vh;
+}
+
+.cadastro-conta-dialog .mat-mdc-dialog-content,
+.cadastro-conta-dialog .mdc-dialog__surface {
+  max-height: none;
+  overflow: visible;
+}
+
+.cadastro-conta-dialog input[type="number"] {
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+.tlb-dialog .mat-mdc-dialog-actions {
+  padding: 8px 24px 20px !important;
+  border-top: 1px solid rgba(0, 200, 240, 0.1);
+}
+
+.transferencia-dialog .mat-mdc-dialog-content,
+.transferencia-dialog .mdc-dialog__surface {
+  max-height: none;
+  overflow: visible;
+}
+
+.efetivar-dialog .mat-mdc-dialog-content,
+.efetivar-dialog .mdc-dialog__surface {
+  max-height: none;
+  overflow: visible;
+}
+
+.transferencia-dialog.cdk-overlay-pane {
+  max-width: none !important;
+}
+
+.transferencia-dialog .mdc-dialog__surface {
+  max-width: none;
+  width: 100%;
+}
+
+.transferencia-dialog input[type="number"] {
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+.conta-select-panel {
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-primaria) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--cor-primaria);
+    border-radius: 3px;
+  }
+
+  .mat-mdc-option {
+    padding-right: 24px;
+  }
+
+  --mat-option-selected-state-layer-color: transparent;
+  --mat-option-focus-state-layer-color: rgba(0, 200, 240, 0.08);
+  --mat-option-hover-state-layer-color: rgba(0, 200, 240, 0.08);
+
+  .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled),
+  .mat-mdc-option.mat-mdc-option-active,
+  .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled):not(:hover) {
+    background: transparent !important;
+  }
+
+  .mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+    background: rgba(0, 200, 240, 0.08) !important;
+  }
+}
+
+// ─── Datepicker mês/ano (overlay global) ─────────────────
+.mat-datepicker-content {
+  background: var(--cor-fundo-card) !important;
+  border: 1px solid var(--cor-borda) !important;
+  border-radius: var(--raio-card) !important;
+  box-shadow: var(--sombra-card) !important;
+  forced-color-adjust: none;
+
+  .mat-calendar-header {
+    background: transparent;
+    padding-bottom: 0;
+  }
+
+  .mat-calendar-controls button,
+  .mat-calendar-period-button {
+    color: var(--cor-primaria);
+    font-weight: 600;
+  }
+
+  .mat-calendar-arrow {
+    fill: var(--cor-primaria);
+  }
+
+  .mat-calendar-previous-button,
+  .mat-calendar-next-button {
+    color: var(--cor-primaria);
+  }
+
+  .mat-calendar-body-label {
+    color: #4a7a9b;
+  }
+
+  .mat-calendar-body-cell-content {
+    color: #cdd9e5;
+  }
+
+  .mat-calendar-body-cell:hover .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) {
+    background: rgba(0, 200, 240, 0.1);
+    color: var(--cor-primaria);
+  }
+
+  .mat-calendar-body-selected {
+    background: var(--cor-primaria) !important;
+    color: #050e1a !important;
+    font-weight: 700;
+  }
+
+  .mat-calendar-body-today:not(.mat-calendar-body-selected) .mat-calendar-body-cell-content {
+    border-color: var(--cor-primaria);
+    color: var(--cor-primaria);
+  }
+}
+
+// ─── Select (overlay global) ─────────────────────────────
+.mat-mdc-select-panel {
+  background: var(--cor-fundo-card) !important;
+  border: 1px solid var(--cor-borda) !important;
+  border-radius: var(--raio-card) !important;
+  box-shadow: var(--sombra-card) !important;
+  forced-color-adjust: none;
+
+  // Zera o "state layer" padrão do Material (uma cor de tema que não é a nossa e,
+  // sobreposta ao nosso azul com opacidade, resultava num tom marrom/esverdeado feio).
+  // Sem isso, o background abaixo nunca aparece puro.
+  --mat-option-selected-state-layer-color: transparent;
+  --mat-option-focus-state-layer-color: rgba(0, 200, 240, 0.08);
+  --mat-option-hover-state-layer-color: rgba(0, 200, 240, 0.08);
+
+  .mat-mdc-optgroup-label {
+    color: var(--cor-primaria) !important;
+    font-weight: 600;
+  }
+
+  .mat-mdc-option {
+    color: var(--cor-texto-secundario);
+
+    &:hover:not(.mdc-list-item--disabled) {
+      background: rgba(0, 200, 240, 0.1) !important;
+    }
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled),
+    &.mat-mdc-option-active {
+      background: rgba(0, 200, 240, 0.15) !important;
+      color: var(--cor-primaria);
+    }
+
+    .mdc-list-item__primary-text {
+      color: inherit;
+    }
+  }
+}
+
+.tlb-btn-primary {
+  background: var(--gradiente-btn) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(0, 229, 255, 0.5) !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
+  border-radius: var(--raio-input) !important;
+
+  &:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 0 16px rgba(0, 200, 240, 0.4);
+  }
+}

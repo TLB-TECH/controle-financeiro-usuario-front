@@ -1,0 +1,132 @@
+<div class="page-container">
+    <app-sidebar activePage="orcamento-cartoes"></app-sidebar>
+
+    <div class="content">
+        <div class="header">
+            <h1>Orçamento de Cartões de Crédito</h1>
+            <button class="btn-novo" (click)="abrirFormulario()">
+                <mat-icon>add</mat-icon> Novo Orçamento
+            </button>
+        </div>
+
+        <!-- TABELA -->
+        <div class="table-card">
+            <table mat-table [dataSource]="orcamentos" class="mat-elevation-z0">
+
+                <ng-container matColumnDef="alvo">
+                    <th mat-header-cell *matHeaderCellDef>Cartão</th>
+                    <td mat-cell *matCellDef="let o">{{ nomeAlvo(o) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="periodo">
+                    <th mat-header-cell *matHeaderCellDef>Período</th>
+                    <td mat-cell *matCellDef="let o">
+                        <span *ngIf="o.tipo === 'DEFINITIVO'" class="badge-definitivo">Definitivo</span>
+                        <span *ngIf="o.tipo === 'ANUAL'">Ano {{ o.ano }}</span>
+                        <span *ngIf="o.tipo === 'MENSAL'">{{ nomeMes(o.mes) }} / {{ o.ano }}</span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="valorLimite">
+                    <th mat-header-cell *matHeaderCellDef>Valor Limite</th>
+                    <td mat-cell *matCellDef="let o">{{ o.valorLimite | currency:'BRL':'R$ ' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="acoes">
+                    <th mat-header-cell *matHeaderCellDef>Ações</th>
+                    <td mat-cell *matCellDef="let o">
+                        <button mat-icon-button class="btn-edit" (click)="abrirFormulario(o)" title="Editar">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button class="btn-excluir" (click)="excluir(o.id)" title="Excluir">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+                <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
+
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell empty-row" colspan="4">Nenhum orçamento de cartão cadastrado.</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Dialog de criação / edição -->
+<ng-template #formDialog>
+    <div class="dialog-header">
+        <h3 class="dialog-title">{{ editandoId ? 'Editar Orçamento' : 'Novo Orçamento' }}</h3>
+        <button class="dialog-close-btn" (click)="fecharFormulario()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content>
+        <form [formGroup]="formulario" class="form-row">
+            <div class="span-full">
+                <div class="tipo-toggle">
+                    <button type="button" class="tipo-btn" [class.ativo]="formulario.get('tipoAlvo')?.value === 'CARTAO'"
+                        (click)="formulario.get('tipoAlvo')?.setValue('CARTAO')">Cartão Específico</button>
+                    <button type="button" class="tipo-btn" [class.ativo]="formulario.get('tipoAlvo')?.value === 'TODOS_CARTOES'"
+                        (click)="formulario.get('tipoAlvo')?.setValue('TODOS_CARTOES')">Todos os Cartões</button>
+                </div>
+            </div>
+
+            <div class="span-full">
+                <div class="tipo-toggle">
+                    <button type="button" class="tipo-btn" [class.ativo]="formulario.get('tipo')?.value === 'MENSAL'"
+                        (click)="formulario.get('tipo')?.setValue('MENSAL')">Mensal</button>
+                    <button type="button" class="tipo-btn" [class.ativo]="formulario.get('tipo')?.value === 'ANUAL'"
+                        (click)="formulario.get('tipo')?.setValue('ANUAL')">Anual</button>
+                    <button type="button" class="tipo-btn" [class.ativo]="formulario.get('tipo')?.value === 'DEFINITIVO'"
+                        (click)="formulario.get('tipo')?.setValue('DEFINITIVO')">Definitivo</button>
+                </div>
+            </div>
+
+            <div class="mes-campo" *ngIf="formulario.get('tipoAlvo')?.value === 'CARTAO'">
+                <label>Cartão</label>
+                <select formControlName="cartaoCreditoId">
+                    <option [ngValue]="null" disabled>Selecione</option>
+                    <option *ngFor="let c of cartoes" [ngValue]="c.id">{{ c.nome }}</option>
+                </select>
+            </div>
+
+            <ng-container *ngIf="formulario.get('tipo')?.value === 'MENSAL'">
+                <div class="mes-campo">
+                    <label>Mês</label>
+                    <select formControlName="mes">
+                        <option [ngValue]="null" disabled>Selecione</option>
+                        <option *ngFor="let m of meses" [ngValue]="m.valor">{{ m.nome }}</option>
+                    </select>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="formulario.get('tipo')?.value === 'MENSAL' || formulario.get('tipo')?.value === 'ANUAL'">
+                <div class="mes-campo">
+                    <label>Ano</label>
+                    <div class="ano-stepper">
+                        <button type="button" class="ano-btn" (click)="ajustarAno(-1)"><mat-icon>chevron_left</mat-icon></button>
+                        <span class="ano-valor">{{ formulario.get('ano')?.value ?? '—' }}</span>
+                        <button type="button" class="ano-btn" (click)="ajustarAno(1)"><mat-icon>chevron_right</mat-icon></button>
+                    </div>
+                </div>
+            </ng-container>
+
+            <div class="mes-campo">
+                <label>Valor Limite (R$)</label>
+                <input type="text" inputmode="decimal" autocomplete="off" placeholder="0,00"
+                    [value]="valorLimiteDisplay" (input)="onValorLimiteInput($event)">
+            </div>
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button class="btn-cancelar" (click)="fecharFormulario()">Cancelar</button>
+        <button class="btn-salvar" (click)="salvar()" [disabled]="formulario.invalid">
+            Salvar
+        </button>
+    </mat-dialog-actions>
+</ng-template>

@@ -1,0 +1,72 @@
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cor-fundo);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: #0d2137;
+  border: 1px solid rgba(0, 200, 240, 0.15);
+  border-radius: 16px;
+  padding: 40px 36px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 24px;
+
+  .logo-text {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 2px;
+  }
+
+  .logo-accent { color: var(--cor-primaria); }
+
+  h2 {
+    margin: 12px 0 0;
+    font-size: 1.1rem;
+    color: #90caf9;
+    font-weight: 400;
+  }
+}
+
+.full-width { width: 100%; }
+
+.btn-primary {
+  background: var(--gradiente-btn);
+  color: white;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.erro {
+  color: #ff5252;
+  font-size: 0.8rem;
+  margin: -8px 0 8px;
+}
+
+.sucesso-msg {
+  color: #69f0ae;
+  text-align: center;
+  font-size: 0.9rem;
+  margin: 16px 0;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+
+  a {
+    color: var(--cor-primaria);
+    font-size: 0.875rem;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
+}

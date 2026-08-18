@@ -1,0 +1,36 @@
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="logo-text">CONTROLE<span class="logo-accent">FIN</span></span>
+            <h2>Recuperar Senha</h2>
+        </div>
+
+        <ng-container *ngIf="!enviado; else sucesso">
+            <p class="subtitulo">Informe seu e-mail e enviaremos um link para redefinir a senha.</p>
+
+            <form [formGroup]="form" (ngSubmit)="enviar()">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>E-mail</mat-label>
+                    <input matInput formControlName="email" type="email" autocomplete="email">
+                </mat-form-field>
+
+                <p class="erro" *ngIf="erro">{{ erro }}</p>
+
+                <button mat-flat-button class="btn-primary full-width" type="submit"
+                    [disabled]="form.invalid || carregando">
+                    {{ carregando ? 'Enviando...' : 'Enviar link' }}
+                </button>
+            </form>
+        </ng-container>
+
+        <ng-template #sucesso>
+            <p class="sucesso-msg">
+                ✅ E-mail enviado! Verifique sua caixa de entrada e siga as instruções.
+            </p>
+        </ng-template>
+
+        <div class="auth-footer">
+            <a routerLink="/login">Voltar ao login</a>
+        </div>
+    </div>
+</div>

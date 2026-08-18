@@ -1,0 +1,38 @@
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="logo-text">CONTROLE<span class="logo-accent">FIN</span></span>
+            <h2>Nova Senha</h2>
+        </div>
+
+        <ng-container *ngIf="!sucesso; else okTemplate">
+            <form [formGroup]="form" (ngSubmit)="salvar()">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Nova senha</mat-label>
+                    <input matInput formControlName="novaSenha" type="password">
+                    <mat-hint>Mínimo 6 caracteres</mat-hint>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Confirmar senha</mat-label>
+                    <input matInput formControlName="confirmarSenha" type="password">
+                </mat-form-field>
+
+                <p class="erro" *ngIf="erro">{{ erro }}</p>
+
+                <button mat-flat-button class="btn-primary full-width" type="submit"
+                    [disabled]="form.invalid || carregando || !token">
+                    {{ carregando ? 'Salvando...' : 'Redefinir senha' }}
+                </button>
+            </form>
+        </ng-container>
+
+        <ng-template #okTemplate>
+            <p class="sucesso-msg">✅ Senha redefinida! Redirecionando para o login...</p>
+        </ng-template>
+
+        <div class="auth-footer">
+            <a routerLink="/login">Voltar ao login</a>
+        </div>
+    </div>
+</div>

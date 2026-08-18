@@ -1,0 +1,370 @@
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: var(--cor-fundo);
+}
+
+.main-content {
+    margin-left: 240px;
+    padding: 32px;
+    flex: 1;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--cor-primaria);
+    margin: 0;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--cor-primaria);
+    margin: 0 0 12px;
+}
+
+.btn-outline-primario {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--cor-primaria);
+    border: 1px solid var(--cor-primaria);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &:not(:disabled):hover {
+        background: rgba(0, 200, 240, 0.12);
+    }
+}
+
+
+.form-card {
+    margin-bottom: 24px;
+    padding: 24px;
+    background: var(--cor-fundo-card) !important;
+    border: 1px solid var(--cor-borda) !important;
+    border-radius: var(--raio-card) !important;
+    box-shadow: var(--sombra-card) !important;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: var(--cor-primaria);
+        border-radius: var(--raio-card) var(--raio-card) 0 0;
+        opacity: 0.8;
+    }
+}
+
+.table-card {
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 32px;
+    background: var(--cor-fundo-card) !important;
+    border: 1px solid var(--cor-borda) !important;
+    border-radius: var(--raio-card) !important;
+    box-shadow: var(--sombra-card) !important;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: var(--cor-primaria);
+        border-radius: var(--raio-card) var(--raio-card) 0 0;
+        opacity: 0.8;
+    }
+}
+
+.form-title {
+    font-size: 1rem;
+    color: var(--cor-primaria);
+    margin: 0 0 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.dialog-form {
+    padding-top: 8px;
+}
+
+.tipo-checkboxes {
+    display: flex;
+    gap: 24px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.tipo-aviso {
+    color: #ff5252;
+    font-size: 0.8rem;
+    margin: 4px 0 16px;
+}
+
+.campo-saldo-inicial {
+    margin-top: 16px;
+}
+
+.saldo-aviso {
+    color: #4a7a9b;
+    margin-top: 4px;
+}
+
+.btn-cancelar {
+    background: transparent;
+    border: 1px solid rgba(0, 200, 240, 0.25);
+    border-radius: 8px;
+    color: #4a7a9b;
+    padding: 8px 20px;
+    cursor: pointer;
+    font-size: 0.875rem;
+
+    &:hover {
+        border-color: #ff5252;
+        color: #ff5252;
+    }
+}
+
+.btn-salvar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--cor-primaria);
+    border-radius: 8px;
+    color: var(--cor-primaria);
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 8px 24px;
+    cursor: pointer;
+    min-width: 90px;
+    transition: background 0.2s;
+
+    &:hover:not(:disabled) {
+        background: rgba(0, 200, 240, 0.12);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+// ---- Dialog de exclusão (aviso) ----
+.dialog-header-perigo::before {
+    background: #ff5252 !important;
+}
+
+.dialog-title-perigo {
+    color: #ff5252 !important;
+}
+
+.aviso-exclusao {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 4px 0 12px;
+
+    .aviso-icon {
+        color: #ffd740;
+        flex-shrink: 0;
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+    }
+
+    p {
+        margin: 0;
+        color: #cdd9e5;
+        font-size: 0.9rem;
+        line-height: 1.5;
+
+        strong { color: #fff; }
+    }
+}
+
+.btn-excluir-confirmar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff5252;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 8px 24px;
+    cursor: pointer;
+    min-width: 90px;
+
+    &:hover:not(:disabled) { opacity: 0.85; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.contas-table {
+    width: 100%;
+    background: transparent;
+}
+
+.saldo-cell {
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    font-variant-numeric: tabular-nums;
+
+    &.saldo-positivo {
+        color: #69f0ae;
+    }
+
+    &.saldo-negativo {
+        color: #ff5252;
+    }
+}
+
+.saldo-cifrao {
+    margin-right: 6px;
+    opacity: 0.75;
+    font-weight: 500;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    &-banco {
+        background: rgba(0, 200, 240, 0.15);
+        color: var(--cor-primaria);
+    }
+
+    &-aplicacao {
+        background: rgba(105, 240, 174, 0.15);
+        color: #69f0ae;
+    }
+}
+
+.acoes-btns {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: opacity 0.2s;
+
+    &:hover {
+        opacity: 0.8;
+    }
+}
+
+.btn-extrato mat-icon {
+    color: #d4b483;
+}
+
+.btn-edit mat-icon {
+    color: #ffd740;
+}
+
+.btn-excluir mat-icon {
+    color: #ff5252;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 56px 32px;
+    color: #4a7a9b;
+}
+
+::ng-deep {
+    .contas-table {
+        .mat-mdc-header-row {
+            background: rgba(0, 200, 240, 0.05);
+        }
+
+        .mat-mdc-header-cell {
+            color: var(--cor-primaria);
+            font-weight: 600;
+            font-size: 0.8rem;
+            border-bottom-color: rgba(0, 200, 240, 0.1);
+        }
+
+        .mat-mdc-cell {
+            color: #e0e0e0;
+            border-bottom-color: rgba(0, 200, 240, 0.05);
+        }
+
+        .mat-mdc-row:hover {
+            background: rgba(0, 200, 240, 0.04);
+        }
+
+        // Larguras fixas e iguais nas duas tabelas (Conta Corrente / Aplicação),
+        // pra coluna de saldo ficar alinhada uma embaixo da outra.
+        .mat-column-nome  { width: 26%; }
+        .mat-column-banco { width: 20%; }
+        .mat-column-tipo  { width: 16%; }
+        .mat-column-saldo { width: 20%; }
+        .mat-column-acoes { width: 18%; }
+    }
+
+    .mat-mdc-text-field-wrapper {
+        background-color: rgba(0, 200, 240, 0.05) !important;
+    }
+
+    .mat-mdc-form-field-input-control {
+        color: #e0e0e0 !important;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+        border-color: rgba(0, 200, 240, 0.3) !important;
+    }
+}

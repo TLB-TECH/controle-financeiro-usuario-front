@@ -1,0 +1,827 @@
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background: var(--cor-fundo);
+}
+
+.main-content {
+  margin-left: 240px;
+  padding: 32px;
+  flex: 1;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--cor-primaria);
+  margin: 0;
+}
+
+.btn-novo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--cor-primaria);
+  border: 1px solid var(--cor-primaria);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  mat-icon { font-size: 1.1rem; height: 20px; width: 20px; }
+  &:hover { background: rgba(0, 200, 240, 0.12); }
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.filtro-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filtro-sep {
+  width: 1px;
+  height: 24px;
+  background: rgba(0, 200, 240, 0.25);
+  margin: 0 4px;
+}
+
+.filtro-btn {
+  padding: 6px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 200, 240, 0.25);
+  background: transparent;
+  color: #4a7a9b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { border-color: var(--cor-primaria); color: var(--cor-primaria); }
+  &.active { background: var(--cor-primaria); border-color: var(--cor-primaria); color: #050e1a; font-weight: 600; }
+  &.receita.active { background: #00e676; border-color: #00e676; color: #050e1a; }
+  &.despesa.active { background: #ff5252; border-color: #ff5252; color: #fff; }
+}
+
+.busca-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+// mat-select usado "solto" (sem mat-form-field) só como trigger — o painel de opções
+// já é estilizado globalmente em styles.scss (.mat-mdc-select-panel), com o mesmo
+// tema escuro do resto do app, ao contrário do <select> nativo (dropdown do SO, sempre claro).
+.busca-campo-select {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 190px;
+  width: 190px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  background: transparent;
+  border: 1px solid rgba(0, 200, 240, 0.25);
+  border-radius: 20px;
+  color: #4a7a9b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+  // Impede que "cores forçadas" do Windows (alto contraste) substituam nossas cores
+  // por um branco/preto de sistema, ignorando todo o CSS acima.
+  forced-color-adjust: none;
+  &:hover { border-color: var(--cor-primaria); color: var(--cor-primaria); }
+
+  ::ng-deep {
+    .mat-mdc-select-value, .mat-mdc-select-placeholder { color: inherit; }
+    .mat-mdc-select-arrow { color: inherit; }
+  }
+}
+
+.busca-campo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 420px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  background: transparent;
+  border: 1px solid rgba(0, 200, 240, 0.25);
+  border-radius: 20px;
+  transition: all 0.2s;
+  forced-color-adjust: none;
+
+  &:hover, &:focus-within { border-color: var(--cor-primaria); }
+
+  mat-icon { font-size: 1.1rem; height: 20px; width: 20px; color: #4a7a9b; flex-shrink: 0; }
+
+  input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--cor-primaria);
+    font-size: 0.9rem;
+    &::placeholder { color: #4a7a9b; }
+
+    // Autopreenchimento do Chrome pinta o campo de amarelo/branco por cima de
+    // qualquer CSS normal — só esse truque do inset shadow consegue sobrescrever.
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-text-fill-color: var(--cor-primaria) !important;
+      -webkit-box-shadow: 0 0 0 1000px var(--cor-fundo-card) inset !important;
+      box-shadow: 0 0 0 1000px var(--cor-fundo-card) inset !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+  }
+}
+
+.periodo-campo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  background: transparent;
+  border: 1px solid rgba(0, 200, 240, 0.25);
+  border-radius: 20px;
+  transition: all 0.2s;
+  forced-color-adjust: none;
+
+  &:hover, &:focus-within { border-color: var(--cor-primaria); }
+
+  label { font-size: 0.85rem; color: #4a7a9b; white-space: nowrap; }
+
+  // Input de texto acoplado ao mat-datepicker (mesmo padrão do .campo-data no formulário)
+  // em vez de input[type=date] nativo — o calendário que abre é o overlay do Material,
+  // já temático (ver .mat-datepicker-content em styles.scss), sem o branco do SO.
+  input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--cor-primaria);
+    font-size: 0.9rem;
+    max-width: 100px;
+    cursor: pointer;
+    &::placeholder { color: #4a7a9b; }
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-text-fill-color: var(--cor-primaria) !important;
+      -webkit-box-shadow: 0 0 0 1000px var(--cor-fundo-card) inset !important;
+      box-shadow: 0 0 0 1000px var(--cor-fundo-card) inset !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+  }
+}
+
+.busca-buscar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 200, 240, 0.25);
+  background: transparent;
+  color: #4a7a9b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  forced-color-adjust: none;
+  mat-icon { font-size: 1.1rem; height: 18px; width: 18px; }
+  &:hover { border-color: var(--cor-primaria); color: var(--cor-primaria); }
+}
+
+.busca-limpar {
+  background: transparent;
+  border: none;
+  color: #4a7a9b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  &:hover { color: var(--cor-primaria); }
+}
+
+.mes-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--cor-fundo-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  box-shadow: var(--sombra-card);
+}
+
+.mes-btn {
+  background: transparent;
+  border: none;
+  color: #4a7a9b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 50%;
+  transition: color 0.2s;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  &:hover { color: var(--cor-primaria); }
+}
+
+.mes-label {
+  color: var(--cor-primaria);
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-width: 150px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.2s;
+  &:hover { color: var(--cor-primaria-hover); }
+}
+
+.form-card {
+  margin-bottom: 24px;
+  padding: 24px;
+  background: var(--cor-fundo-card) !important;
+  border: 1px solid var(--cor-borda) !important;
+  border-radius: var(--raio-card) !important;
+  box-shadow: var(--sombra-card) !important;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--cor-primaria);
+    border-radius: var(--raio-card) var(--raio-card) 0 0;
+    opacity: 0.8;
+  }
+}
+
+.form-title {
+  color: var(--cor-primaria);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  .span-full { grid-column: 1 / -1; }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.dialog-form {
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  .full-width { width: 100%; }
+}
+
+// Mesmo padrão de campo usado em Centro de Custo, Metas e Cartões: input/select
+// simples (sem mat-form-field), com correção do autopreenchimento amarelo do
+// Chrome e sem anel de foco nativo.
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    color: #4a7a9b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+  }
+
+  input, select, textarea {
+    background: var(--cor-fundo-input);
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    color: #cdd9e5;
+    font-size: 0.9rem;
+    padding: 10px 12px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+
+    &:hover { border-color: var(--cor-borda-hover); }
+
+    &:focus {
+      outline: none;
+      border-color: var(--cor-primaria);
+    }
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-text-fill-color: #cdd9e5 !important;
+      -webkit-box-shadow: 0 0 0 1000px var(--cor-fundo-input) inset !important;
+      box-shadow: 0 0 0 1000px var(--cor-fundo-input) inset !important;
+      caret-color: var(--cor-primaria);
+      transition: background-color 5000s ease-in-out 0s;
+    }
+  }
+
+  textarea { resize: vertical; }
+}
+
+.campo-avulso { width: 100%; }
+
+// Dropdown customizado de conta (diálogo Efetivar Título): mesmo visual de "linha
+// pontilhada" ligando nome e saldo colorido usado no diálogo de Transferência entre
+// Contas, mas sem mat-select — mantém o padrão de inputs "plain" do resto do app.
+.conta-select {
+  position: relative;
+
+  .conta-select-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--cor-fundo-input);
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    color: #cdd9e5;
+    font-size: 0.9rem;
+    font-family: inherit;
+    padding: 10px 12px;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    text-align: left;
+
+    &:hover { border-color: var(--cor-borda-hover); }
+  }
+
+  &.aberto .conta-select-trigger {
+    border-color: var(--cor-primaria);
+  }
+
+  .conta-select-placeholder { color: #4a7a9b; }
+
+  .conta-select-caret {
+    margin-left: auto;
+    color: #4a7a9b;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+  }
+
+  &.aberto .conta-select-caret { transform: rotate(180deg); }
+
+  .conta-dropdown-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+  }
+
+  .conta-dropdown-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 11;
+    background: var(--cor-fundo-input);
+    border: 1px solid var(--cor-primaria);
+    border-radius: 8px;
+    padding: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .conta-dropdown-grupo {
+    color: #4a7a9b;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 6px 8px 4px;
+  }
+}
+
+.conta-opt {
+  display: flex;
+  align-items: baseline;
+  width: 100%;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #cdd9e5;
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 8px;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover { background: rgba(0, 200, 240, 0.1); }
+}
+
+.conta-opt-nome {
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conta-opt-banco {
+  color: #4a7a9b;
+  font-size: 0.85em;
+}
+
+.conta-opt-dots {
+  flex: 1;
+  align-self: flex-end;
+  height: 0;
+  margin-bottom: 5px;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.18);
+}
+
+.conta-opt-saldo {
+  flex-shrink: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+
+  &.saldo-positivo { color: #69f0ae; }
+  &.saldo-negativo { color: #ff5252; }
+}
+
+.campo-erro {
+  color: #ff5252;
+  font-size: 0.72rem;
+}
+
+.campo-hint {
+  color: #4a7a9b;
+  font-size: 0.72rem;
+}
+
+// Campo de data: input de texto do datepicker + botão de calendário, no mesmo
+// visual dos demais inputs (sem o chrome padrão do Material).
+.campo-data {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+
+  input { flex: 1; cursor: pointer; }
+
+  ::ng-deep .mat-datepicker-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4a7a9b;
+
+    .mat-mdc-icon-button {
+      width: 40px;
+      height: 40px;
+      padding: 8px;
+    }
+
+    &:hover { color: var(--cor-primaria); }
+  }
+}
+
+.opcao-novo-centro {
+  color: var(--cor-primaria);
+  font-weight: 600;
+}
+
+.resumo-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: rgba(0, 200, 240, 0.06);
+  border: 1px solid rgba(0, 200, 240, 0.15);
+  border-radius: 8px;
+}
+
+.resumo-descricao {
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.resumo-valor {
+  font-weight: 700;
+  font-size: 1rem;
+
+  &.receita { color: #69f0ae; }
+  &.despesa { color: #ff5252; }
+}
+
+.detalhes-lista {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+  margin-bottom: 16px;
+}
+
+.detalhes-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detalhes-label {
+  color: #4a7a9b;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+}
+
+.detalhes-valor {
+  color: #e0e0e0;
+  font-size: 0.9rem;
+}
+
+.detalhes-observacao {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: rgba(0, 200, 240, 0.06);
+  border: 1px solid rgba(0, 200, 240, 0.15);
+  border-radius: 8px;
+
+  p {
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+  }
+}
+
+.btn-cancelar {
+  background: transparent;
+  border: 1px solid rgba(0, 200, 240, 0.25);
+  border-radius: 8px;
+  color: #4a7a9b;
+  padding: 8px 20px;
+  cursor: pointer;
+  &:hover { border-color: #ff5252; color: #ff5252; }
+}
+
+.btn-outline-primario {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  background: transparent;
+  color: var(--cor-primaria);
+  border: 1px solid var(--cor-primaria);
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 90px;
+  transition: background 0.2s;
+
+  mat-icon { font-size: 1.1rem; height: 20px; width: 20px; }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:not(:disabled):hover { background: rgba(0, 200, 240, 0.12); }
+  &:focus, &:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--cor-fundo-card), 0 0 0 4px var(--cor-primaria); }
+}
+
+// ---- Dialog de exclusão (aviso) ----
+.dialog-header-perigo::before {
+  background: #ff5252 !important;
+}
+
+.dialog-title-perigo {
+  color: #ff5252 !important;
+}
+
+.aviso-exclusao {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 4px 0 12px;
+
+  .aviso-icon {
+    color: #ffd740;
+    flex-shrink: 0;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  p {
+    margin: 0;
+    color: #cdd9e5;
+    font-size: 0.9rem;
+    line-height: 1.5;
+
+    strong { color: #fff; }
+  }
+}
+
+.acoes-exclusao {
+  gap: 10px;
+}
+
+.aviso-parcelas {
+  margin: 0 0 8px;
+  padding: 10px 14px;
+  background: rgba(0, 200, 240, 0.08);
+  border: 1px solid rgba(0, 200, 240, 0.25);
+  border-radius: 8px;
+  color: #cdd9e5;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.btn-excluir-confirmar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ff5252;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  padding: 8px 24px;
+  cursor: pointer;
+  min-width: 90px;
+  &:hover:not(:disabled) { opacity: 0.85; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.table-card {
+  padding: 0;
+  overflow: hidden;
+  background: var(--cor-fundo-card) !important;
+  border: 1px solid var(--cor-borda) !important;
+  border-radius: var(--raio-card) !important;
+  box-shadow: var(--sombra-card) !important;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--cor-primaria);
+    border-radius: var(--raio-card) var(--raio-card) 0 0;
+    opacity: 0.8;
+  }
+}
+
+.lancamentos-table {
+  width: 100%;
+  background: transparent;
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 60px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px;
+  gap: 12px;
+  color: #4a7a9b;
+  .empty-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.4; }
+  p { margin: 0; }
+}
+
+.btn-criar {
+  background: var(--gradiente-btn);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  padding: 10px 24px;
+  cursor: pointer;
+  margin-top: 8px;
+  &:hover { opacity: 0.9; }
+}
+
+.badge-tipo {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  &.receita { background: rgba(0,230,118,0.12); color: #00e676; }
+  &.despesa { background: rgba(255,82,82,0.10); color: #ff5252; }
+}
+
+.badge-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  &.pendente  { background: rgba(255,215,64,0.12); color: #ffd740; }
+  &.efetivado { background: rgba(0,230,118,0.12);  color: #00e676; }
+  &.cancelado { background: rgba(255,82,82,0.10);  color: #ff5252; }
+}
+
+.valor-receita { color: #00e676 !important; font-weight: 600; }
+.valor-despesa { color: #ff5252 !important; font-weight: 600; }
+
+td.vencido { color: #ff5252 !important; font-weight: 600; }
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.8; }
+}
+
+.acoes-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+::ng-deep {
+  .lancamentos-table {
+    .mat-mdc-header-row { background: rgba(0, 200, 240, 0.05); }
+    .mat-mdc-header-cell {
+      color: var(--cor-primaria);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      border-bottom-color: rgba(0, 200, 240, 0.1);
+    }
+    .mat-mdc-cell {
+      color: #e0e0e0;
+      border-bottom-color: rgba(0, 200, 240, 0.05);
+    }
+    .mat-mdc-row:hover { background: rgba(0, 200, 240, 0.04); }
+
+    .mat-column-acoes {
+      white-space: nowrap;
+      width: 170px;
+      min-width: 170px;
+    }
+  }
+
+  .btn-info mat-icon     { color: var(--cor-primaria); }
+  .btn-edit mat-icon     { color: #ffd740; }
+  .btn-efetivar mat-icon { color: #00e676; }
+  .btn-excluir mat-icon  { color: #ff5252; }
+}

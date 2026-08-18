@@ -1,0 +1,342 @@
+<div class="page-wrapper">
+  <app-sidebar activePage="dashboard"></app-sidebar>
+
+  <main class="main-content">
+
+    <!-- Filtro de Mês/Ano + Aplicações + Saldo em Tempo Real -->
+    <div class="filtros">
+      <div class="filtros-esquerda">
+        <div class="realtime-box">
+          <span class="live-dot"></span>
+          <div class="realtime-info">
+            <span class="realtime-lbl">Saldo Atual</span>
+            <span class="realtime-val" [class.neg]="saldoTempoReal<0">{{ fmt(saldoTempoReal) }}</span>
+          </div>
+        </div>
+
+        <div class="aplicacao-box" [title]="nomesAplicacoes">
+          <mat-icon>savings</mat-icon>
+          <div class="aplicacao-info">
+            <span class="aplicacao-lbl">Aplicações</span>
+            <span class="aplicacao-val">{{ fmt(totalAplicacoes) }}</span>
+          </div>
+        </div>
+
+        <div class="aplicacao-box receita-box">
+          <mat-icon>trending_up</mat-icon>
+          <div class="aplicacao-info">
+            <span class="aplicacao-lbl">Receita do Mês</span>
+            <span class="aplicacao-val">{{ fmt(totalReceitasMes) }}</span>
+          </div>
+        </div>
+
+        <div class="aplicacao-box despesa-box">
+          <mat-icon>trending_down</mat-icon>
+          <div class="aplicacao-info">
+            <span class="aplicacao-lbl">Despesas do Mês</span>
+            <span class="aplicacao-val despesa-val">{{ fmt(totalDespesasMes) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mes-nav">
+        <button class="mes-btn" (click)="mesAnterior()"><mat-icon>chevron_left</mat-icon></button>
+        <input [matDatepicker]="pickerMes" [value]="dataMesAno"
+               style="width:0;height:0;padding:0;border:0;opacity:0;position:absolute" readonly>
+        <mat-datepicker #pickerMes startView="year" xPosition="start"
+          (monthSelected)="selecionarMesAno($event, pickerMes)">
+        </mat-datepicker>
+        <button class="mes-label" (click)="pickerMes.open()">{{ mesAnoLabel }}</button>
+        <button class="mes-btn" (click)="mesSeguinte()"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+    </div>
+
+    <!-- Row 1: Cards de resumo + Donuts -->
+    <div class="row-4">
+      <mat-card class="summary-card bancos-card">
+        <div class="summary-info">
+          <span class="lbl">Saldo dos Bancos</span>
+          <div class="bancos-lista" *ngIf="contasBanco.length; else semBanco">
+            <div class="banco-item" *ngFor="let c of contasBanco">
+              <span class="banco-nome"><mat-icon>account_balance</mat-icon>{{ c.banco }}</span>
+              <span class="banco-dots"></span>
+              <span class="banco-saldo" [class.neg]="c.saldo<0">
+                <span class="banco-cifrao">R$</span><span class="banco-valor">{{ formatarNumero(c.saldo) }}</span>
+              </span>
+            </div>
+          </div>
+          <ng-template #semBanco>
+            <span class="val">Nenhum banco cadastrado</span>
+          </ng-template>
+        </div>
+      </mat-card>
+
+      <mat-card class="summary-card bancos-card">
+        <div class="summary-info">
+          <span class="lbl">Aplicações</span>
+          <div class="bancos-lista" *ngIf="contasAplicacao.length; else semAplicacao">
+            <div class="banco-item" *ngFor="let c of contasAplicacao">
+              <span class="banco-nome"><mat-icon>savings</mat-icon>{{ c.banco }}</span>
+              <span class="banco-dots"></span>
+              <span class="banco-saldo" [class.neg]="c.saldo<0">
+                <span class="banco-cifrao">R$</span><span class="banco-valor">{{ formatarNumero(c.saldo) }}</span>
+              </span>
+            </div>
+          </div>
+          <ng-template #semAplicacao>
+            <span class="val">Nenhuma aplicação cadastrada</span>
+          </ng-template>
+        </div>
+      </mat-card>
+
+      <div class="gauges-cluster">
+        <mat-card class="chart-card meta-card saude-card">
+          <h3 class="card-title">Saúde Financeira do Mês</h3>
+          <div class="meta-gauge-wrap">
+            <canvas baseChart [data]="saudeZonasData" [options]="saudeGaugeOpts" [plugins]="gaugeNeedlePlugins" type="doughnut"></canvas>
+            <span class="meta-gauge-pct" [style.color]="saudeFinanceira.cor">{{ saudeFinanceira.score }}</span>
+          </div>
+          <div class="meta-info">
+            <span class="saude-status" [style.color]="saudeFinanceira.cor">{{ saudeFinanceira.status }}</span>
+          </div>
+        </mat-card>
+
+        <mat-card class="chart-card meta-card">
+          <h3 class="card-title">Meta Mensal de Aplicação</h3>
+          <div class="meta-gauge-wrap">
+            <canvas baseChart [data]="metaZonasData" [options]="metaMensalOpts" [plugins]="gaugeNeedlePlugins" type="doughnut"></canvas>
+            <span class="meta-gauge-pct" [style.color]="corFaixaMeta(pctMetaMensalAgulha)">{{ pctMetaMensal }}%</span>
+          </div>
+          <div class="meta-info">
+            <span class="meta-atual">{{ fmt(aplicadoMes) }}</span>
+            <span class="meta-sep">de</span>
+            <span class="meta-valor">{{ fmt(metaMensal) }}</span>
+          </div>
+        </mat-card>
+
+        <mat-card class="chart-card meta-card">
+          <h3 class="card-title">Meta Anual de Aplicação</h3>
+          <div class="meta-gauge-wrap">
+            <canvas baseChart [data]="metaZonasData" [options]="metaAnualOpts" [plugins]="gaugeNeedlePlugins" type="doughnut"></canvas>
+            <span class="meta-gauge-pct" [style.color]="corFaixaMeta(pctMetaAnualAgulha)">{{ pctMetaAnual }}%</span>
+          </div>
+          <div class="meta-info">
+            <span class="meta-atual">{{ fmt(aplicadoAno) }}</span>
+            <span class="meta-sep">de</span>
+            <span class="meta-valor">{{ fmt(metaAnual) }}</span>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Row 2+3: Orçamentos (esquerda, abaixo do Saldo dos Bancos) + Análise mensal / Detalhamento (empilhados) -->
+    <div class="row-analise-orcamentos">
+      <mat-card class="chart-card orcamentos-card">
+        <h3 class="card-title">Orçamentos</h3>
+        <div class="orcamento-lista" *ngIf="orcamentosProgresso.length; else semOrcamento">
+          <div class="orcamento-item" *ngFor="let o of orcamentosProgresso">
+            <div class="orcamento-topo">
+              <span class="orcamento-nome">{{ o.nome }}</span>
+              <span class="orcamento-valores">
+                {{ fmt(o.gasto) }} <span class="orcamento-sep">/</span> {{ fmt(o.limite) }}
+              </span>
+            </div>
+            <div class="orcamento-barra-linha">
+              <div class="orcamento-barra">
+                <div class="orcamento-barra-preenchida" [style.width.%]="o.pct" [style.background]="corFaixaOrcamento(o.pctReal)"></div>
+              </div>
+              <mat-icon class="orcamento-alerta" *ngIf="o.pctReal >= 100" title="Orçamento estourado">warning</mat-icon>
+              <span class="orcamento-pct" [style.color]="corFaixaOrcamento(o.pctReal)">{{ o.pctReal }}%</span>
+            </div>
+          </div>
+        </div>
+        <ng-template #semOrcamento>
+          <span class="val">Nenhum orçamento definido para {{ mesAnoLabel }}</span>
+        </ng-template>
+      </mat-card>
+
+      <mat-card class="chart-card cartoes-consumo-card">
+        <h3 class="card-title">Orçamento de Cartões de Crédito</h3>
+
+        <div class="orcamento-item orcamento-item-total" *ngIf="consumoTodosCartoes.temLimite">
+          <div class="orcamento-topo">
+            <span class="orcamento-nome"><mat-icon class="cartao-icone">credit_card</mat-icon>Todos os Cartões</span>
+            <span class="orcamento-valores">
+              {{ fmt(consumoTodosCartoes.gasto) }} <span class="orcamento-sep">/</span> {{ fmt(consumoTodosCartoes.limite) }}
+            </span>
+          </div>
+          <div class="orcamento-barra-linha">
+            <div class="orcamento-barra">
+              <div class="orcamento-barra-preenchida" [style.width.%]="consumoTodosCartoes.pct" [style.background]="corFaixaOrcamento(consumoTodosCartoes.pctReal)"></div>
+            </div>
+            <mat-icon class="orcamento-alerta" *ngIf="consumoTodosCartoes.pctReal >= 100" title="Orçamento estourado">warning</mat-icon>
+            <span class="orcamento-pct" [style.color]="corFaixaOrcamento(consumoTodosCartoes.pctReal)">{{ consumoTodosCartoes.pctReal }}%</span>
+          </div>
+        </div>
+
+        <div class="orcamento-lista" *ngIf="consumoCartoes.length; else semCartaoConsumo">
+          <div class="orcamento-item" *ngFor="let c of consumoCartoes">
+            <div class="orcamento-topo">
+              <span class="orcamento-nome"><mat-icon class="cartao-icone">credit_card</mat-icon>{{ c.nome }}</span>
+              <span class="orcamento-valores">
+                {{ fmt(c.gasto) }}
+                <ng-container *ngIf="c.temLimite"><span class="orcamento-sep">/</span> {{ fmt(c.limite) }}</ng-container>
+                <span class="sem-limite" *ngIf="!c.temLimite">sem limite</span>
+              </span>
+            </div>
+            <div class="orcamento-barra-linha" *ngIf="c.temLimite">
+              <div class="orcamento-barra">
+                <div class="orcamento-barra-preenchida" [style.width.%]="c.pct" [style.background]="corFaixaOrcamento(c.pctReal)"></div>
+              </div>
+              <mat-icon class="orcamento-alerta" *ngIf="c.pctReal >= 100" title="Orçamento estourado">warning</mat-icon>
+              <span class="orcamento-pct" [style.color]="corFaixaOrcamento(c.pctReal)">{{ c.pctReal }}%</span>
+            </div>
+          </div>
+        </div>
+        <ng-template #semCartaoConsumo>
+          <span class="val">Nenhum cartão cadastrado</span>
+        </ng-template>
+      </mat-card>
+
+      <mat-card class="chart-card contas-pagar-card">
+        <h3 class="card-title">Contas a Pagar</h3>
+
+        <div class="modo-toggle contas-pagar-toggle">
+          <button type="button" class="modo-btn" [class.ativo]="modoContasPagar === 'diario'" (click)="modoContasPagar = 'diario'">Diário</button>
+          <button type="button" class="modo-btn" [class.ativo]="modoContasPagar === 'semanal'" (click)="modoContasPagar = 'semanal'">Semanal</button>
+          <button type="button" class="modo-btn" [class.ativo]="modoContasPagar === 'mensal'" (click)="modoContasPagar = 'mensal'">Mensal</button>
+        </div>
+
+        <div class="contas-pagar-lista" *ngIf="contasAPagarAgrupadas.length; else semContasPagar">
+          <div class="contas-pagar-grupo" *ngFor="let g of contasAPagarAgrupadas">
+            <div class="contas-pagar-grupo-topo">
+              <span class="contas-pagar-grupo-titulo">{{ g.titulo }}</span>
+              <span class="contas-pagar-grupo-total">{{ fmt(g.total) }}</span>
+            </div>
+            <div class="contas-pagar-item" *ngFor="let it of g.itens">
+              <span class="contas-pagar-item-desc"><mat-icon>receipt_long</mat-icon>{{ it.descricao }}</span>
+              <span class="contas-pagar-item-dots"></span>
+              <span class="contas-pagar-item-valor">
+                <span class="contas-pagar-item-cifrao">R$</span><span class="contas-pagar-item-num">{{ formatarNumero(it.valor) }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <ng-template #semContasPagar>
+          <span class="val">Nenhuma conta a pagar em {{ mesAnoLabel }}</span>
+        </ng-template>
+      </mat-card>
+
+      <mat-card class="chart-card maiores-contas-card">
+        <h3 class="card-title">Maiores Contas a Pagar</h3>
+
+        <div class="contas-pagar-lista" *ngIf="maioresContasAPagar.length; else semMaioresContas">
+          <div class="contas-pagar-item" *ngFor="let it of maioresContasAPagar">
+            <span class="contas-pagar-item-desc"><mat-icon>receipt_long</mat-icon>{{ it.descricao }}</span>
+            <span class="contas-pagar-item-dots"></span>
+            <span class="contas-pagar-item-valor">
+              <span class="contas-pagar-item-cifrao">R$</span><span class="contas-pagar-item-num">{{ formatarNumero(it.valor) }}</span>
+            </span>
+          </div>
+        </div>
+        <ng-template #semMaioresContas>
+          <span class="val">Nenhuma conta a pagar em {{ mesAnoLabel }}</span>
+        </ng-template>
+      </mat-card>
+
+      <mat-card class="chart-card analise-mensal-card">
+        <h3 class="card-title">
+          Análise Mensal/Anual de Receitas, Despesas e Aplicações
+        </h3>
+
+        <div class="analise-controles">
+          <div class="modo-toggle">
+            <button type="button" class="modo-btn" [class.ativo]="modoAnalise === 'mensal'" (click)="modoAnalise = 'mensal'">Mensal</button>
+            <button type="button" class="modo-btn" [class.ativo]="modoAnalise === 'anual'" (click)="modoAnalise = 'anual'">Anual</button>
+          </div>
+
+          <div class="ano-comparacao" *ngIf="modoAnalise === 'anual'">
+            <div class="ano-picker">
+              <button type="button" class="ano-picker-btn" (click)="toggleAnoDropdown('A')">
+                {{ anoComparacaoA }}
+                <span class="ano-picker-seta"></span>
+              </button>
+              <div class="ano-picker-lista" *ngIf="anoDropdownAberto === 'A'">
+                <button type="button" class="ano-picker-item" *ngFor="let a of anosParaComparar"
+                        [class.selecionado]="a === anoComparacaoA" (click)="selecionarAno('A', a)">{{ a }}</button>
+              </div>
+            </div>
+
+            <span class="ano-vs">vs</span>
+
+            <div class="ano-picker">
+              <button type="button" class="ano-picker-btn" (click)="toggleAnoDropdown('B')">
+                {{ anoComparacaoB }}
+                <span class="ano-picker-seta"></span>
+              </button>
+              <div class="ano-picker-lista" *ngIf="anoDropdownAberto === 'B'">
+                <button type="button" class="ano-picker-item" *ngFor="let a of anosParaComparar"
+                        [class.selecionado]="a === anoComparacaoB" (click)="selecionarAno('B', a)">{{ a }}</button>
+              </div>
+            </div>
+          </div>
+          <div class="ano-backdrop" *ngIf="anoDropdownAberto" (click)="anoDropdownAberto = null"></div>
+        </div>
+
+        <div class="analise-corpo" [class.anual]="modoAnalise === 'anual'">
+          <div class="chart-box tall">
+            <canvas baseChart [data]="barData" [options]="barOpts" type="line"></canvas>
+            <div id="analise-tooltip-fixo" class="analise-tooltip-fixo"></div>
+          </div>
+
+          <div class="comparacao-lateral" *ngIf="modoAnalise === 'anual'">
+            <span class="comparacao-lbl">{{ comparacaoAnual.anoB }} vs {{ comparacaoAnual.anoA }}</span>
+
+            <ng-container *ngIf="comparacaoAnual.pct !== null; else semComparacao">
+              <span class="comparacao-valor" [class.pos]="comparacaoAnual.pct! >= 0" [class.neg]="comparacaoAnual.pct! < 0">
+                <mat-icon>{{ comparacaoAnual.pct! >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+                {{ comparacaoAnual.pct! >= 0 ? '+' : '' }}{{ comparacaoAnual.pct! | number:'1.0-1' }}%
+              </span>
+              <span class="comparacao-desc">{{ comparacaoAnual.pct! >= 0 ? 'melhor' : 'pior' }} que {{ comparacaoAnual.anoA }}</span>
+            </ng-container>
+            <ng-template #semComparacao>
+              <span class="comparacao-valor">—</span>
+              <span class="comparacao-desc">sem dados em {{ comparacaoAnual.anoA }}</span>
+            </ng-template>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="chart-card detalhamento-despesas-card">
+        <h3 class="card-title">
+          Detalhamento de Despesas
+          <span class="card-title-ano" *ngIf="totalDetalhamentoDespesas > 0">{{ fmt(totalDetalhamentoDespesas) }}</span>
+        </h3>
+        <div class="orcamento-lista" *ngIf="despesasDetalhes.length; else semDespesas">
+          <div class="orcamento-item" *ngFor="let d of despesasDetalhes">
+            <div class="orcamento-topo">
+              <span class="orcamento-nome">{{ d.nome }}</span>
+              <span class="orcamento-valores">{{ fmt(d.valor) }}</span>
+            </div>
+            <div class="orcamento-barra-linha">
+              <div class="orcamento-barra-wrap">
+                <div class="orcamento-barra">
+                  <div class="orcamento-barra-preenchida" [style.width.%]="d.pctBarra" [style.background]="d.cor"></div>
+                </div>
+                <div class="orcamento-marcador-anterior" *ngIf="d.temComparativo"
+                  [style.left.%]="d.pctAnteriorBarra" [style.background]="d.corMarcador"
+                  [style.boxShadow]="'0 0 6px 2px ' + d.corMarcador + 'e6, 0 0 2px rgba(0,0,0,0.6)'"
+                  [title]="'Mês anterior: ' + fmt(d.valorAnterior)"></div>
+              </div>
+              <span class="orcamento-pct" [style.color]="d.cor">{{ d.pct }}%</span>
+            </div>
+          </div>
+        </div>
+        <ng-template #semDespesas>
+          <span class="val">Nenhuma despesa em {{ mesAnoLabel }}</span>
+        </ng-template>
+      </mat-card>
+    </div>
+
+  </main>
+</div>

@@ -1,0 +1,55 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <span class="logo-text">CONTROLE<span class="logo-accent">FIN</span></span>
+      <h2>Assinatura</h2>
+    </div>
+
+    <ng-container *ngIf="!carregandoStatus; else carregando">
+      <ng-container [ngSwitch]="acesso?.status">
+
+        <ng-container *ngSwitchCase="'TRIAL'">
+          <p class="subtitulo" *ngIf="acesso?.temAcesso">
+            Você está no período de teste grátis. Restam <strong>{{ acesso?.diasRestantesTrial }}</strong>
+            dia(s). Assine agora para não perder o acesso.
+          </p>
+          <p class="subtitulo" *ngIf="!acesso?.temAcesso">
+            Seu período de teste grátis terminou. Assine para continuar usando o sistema.
+          </p>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'ATIVO'">
+          <p class="sucesso-msg">✅ Sua assinatura está ativa. Aproveite!</p>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'INADIMPLENTE'">
+          <p class="subtitulo">Identificamos um problema com sua última cobrança. Regularize para continuar.</p>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'CANCELADO'">
+          <p class="subtitulo">Sua assinatura foi cancelada. Assine novamente para voltar a ter acesso.</p>
+        </ng-container>
+
+      </ng-container>
+
+      <p class="erro" *ngIf="erro">{{ erro }}</p>
+
+      <button mat-flat-button class="btn-primary full-width" type="button"
+        *ngIf="acesso?.status !== 'ATIVO'"
+        [disabled]="carregandoCheckout"
+        (click)="assinar()">
+        {{ carregandoCheckout ? 'Redirecionando...' : 'Assinar agora - R$ 19,90/mês' }}
+      </button>
+    </ng-container>
+
+    <ng-template #carregando>
+      <div class="carregando-wrapper">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
+    </ng-template>
+
+    <div class="auth-footer">
+      <a (click)="sair()">Sair</a>
+    </div>
+  </div>
+</div>

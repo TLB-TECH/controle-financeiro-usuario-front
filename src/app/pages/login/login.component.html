@@ -1,0 +1,65 @@
+<div class="login-wrapper">
+
+  <div class="grid-bg"></div>
+  <div class="deco-line deco-line-1"></div>
+  <div class="deco-line deco-line-2"></div>
+
+  <div class="tlb-card login-card">
+
+    <!-- Logo com upload -->
+    <div class="logo-area">
+      <div class="logo-circulo" (click)="escolherImagem()" title="Clique para alterar a logo">
+        <img [src]="logoUrl()" alt="TLB TECH" class="logo-img-circulo">
+        <div class="logo-overlay">
+          <mat-icon>photo_camera</mat-icon>
+        </div>
+      </div>
+      <input #inputImagem type="file" accept="image/*" hidden (change)="onImagemSelecionada($event)">
+      <h1 class="logo-texto">TLB TECH</h1>
+      <div class="logo-linha"></div>
+      <p class="logo-subtitulo">CONTROLE FINANCEIRO</p>
+    </div>
+
+    <!-- Formulário -->
+    <form [formGroup]="form" (ngSubmit)="entrar()" class="form-login">
+
+      <mat-form-field appearance="outline" class="campo-tlb">
+        <mat-label>E-mail</mat-label>
+        <input matInput formControlName="email" type="email" placeholder="usuario@email.com"/>
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error *ngIf="emailInvalido">E-mail inválido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="campo-tlb">
+        <mat-label>Senha</mat-label>
+        <input matInput formControlName="senha"
+               [type]="mostrarSenha ? 'text' : 'password'"
+               placeholder="••••••••"/>
+        <button mat-icon-button matSuffix type="button"
+                (click)="mostrarSenha = !mostrarSenha">
+          <mat-icon>{{ mostrarSenha ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="senhaInvalida">Mínimo 6 caracteres</mat-error>
+      </mat-form-field>
+
+      <div class="esqueceu">
+        <a routerLink="/recuperar-senha">Esqueceu a senha?</a>
+      </div>
+
+      <div class="erro-msg" *ngIf="erro">{{ erro }}</div>
+
+      <button mat-flat-button class="tlb-btn-primary btn-entrar"
+              type="submit" [disabled]="carregando">
+        <mat-spinner diameter="20" *ngIf="carregando"></mat-spinner>
+        <span *ngIf="!carregando">ENTRAR</span>
+      </button>
+
+    </form>
+
+    <p class="cadastro-link">
+      Não tem conta?
+      <a routerLink="/cadastro">Cadastre-se</a>
+    </p>
+
+  </div>
+</div>

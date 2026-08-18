@@ -1,0 +1,527 @@
+<div class="page-wrapper">
+  <app-sidebar activePage="lancamentos"></app-sidebar>
+
+  <div class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Lançamentos</h1>
+      <button class="btn-novo" (click)="abrirNovo()">
+        <mat-icon>add</mat-icon> Novo
+      </button>
+    </div>
+
+    <!-- Filtros unificados + navegação de mês -->
+    <div class="toolbar-row">
+      <div class="filtro-btns">
+        <button class="filtro-btn" [class.active]="filtroAtivo === 'TODOS'"      (click)="setFiltro('TODOS')">Todos</button>
+        <button class="filtro-btn receita" [class.active]="filtroAtivo === 'RECEITA'" (click)="setFiltro('RECEITA')">Receita</button>
+        <button class="filtro-btn despesa" [class.active]="filtroAtivo === 'DESPESA'" (click)="setFiltro('DESPESA')">Despesa</button>
+        <div class="filtro-sep"></div>
+        <button class="filtro-btn" [class.active]="filtroAtivo === 'PENDENTE'"  (click)="setFiltro('PENDENTE')">Pendente</button>
+        <button class="filtro-btn" [class.active]="filtroAtivo === 'EFETIVADO'" (click)="setFiltro('EFETIVADO')">Efetivado</button>
+        <button class="filtro-btn" [class.active]="filtroAtivo === 'CANCELADO'" (click)="setFiltro('CANCELADO')">Cancelado</button>
+      </div>
+
+      <div class="mes-nav">
+        <button class="mes-btn" (click)="mesAnterior()"><mat-icon>chevron_left</mat-icon></button>
+        <input [matDatepicker]="pickerMes" [value]="dataMesAno"
+               style="width:0;height:0;padding:0;border:0;opacity:0;position:absolute" readonly>
+        <mat-datepicker #pickerMes startView="year" xPosition="end"
+          (monthSelected)="selecionarMesAno($event, pickerMes)">
+        </mat-datepicker>
+        <button class="mes-label" (click)="pickerMes.open()">{{ mesAnoLabel }}</button>
+        <button class="mes-btn" (click)="mesSeguinte()"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+    </div>
+
+    <!-- Busca: ignora o mês selecionado, procura em todos os períodos -->
+    <div class="busca-row">
+      <mat-select class="busca-campo-select" [(ngModel)]="campoBusca" [ngModelOptions]="{standalone: true}"
+                  (selectionChange)="onCampoBuscaChange()">
+        <mat-option value="descricao">Descrição</mat-option>
+        <mat-option value="centroCusto">Centro de Custo</mat-option>
+        <mat-option value="formaPagamento">Forma de Pagamento</mat-option>
+      </mat-select>
+      <div class="busca-campo">
+        <mat-icon>search</mat-icon>
+        <input type="text" autocomplete="off" [placeholder]="placeholdersBusca[campoBusca]"
+               [(ngModel)]="filtroBusca" [ngModelOptions]="{standalone: true}"
+               (keyup.enter)="buscar()">
+        @if (filtroBusca) {
+          <button class="busca-limpar" (click)="limparBusca()" title="Limpar busca">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+
+      <div class="periodo-campo">
+        <label>De</label>
+        <input readonly autocomplete="off" [matDatepicker]="pickerDe" [(ngModel)]="filtroDataDe" [ngModelOptions]="{standalone: true}"
+               placeholder="dd/mm/aaaa" (click)="pickerDe.open()">
+        <mat-datepicker #pickerDe></mat-datepicker>
+      </div>
+      <div class="periodo-campo">
+        <label>Até</label>
+        <input readonly autocomplete="off" [matDatepicker]="pickerAte" [(ngModel)]="filtroDataAte" [ngModelOptions]="{standalone: true}"
+               placeholder="dd/mm/aaaa" (click)="pickerAte.open()">
+        <mat-datepicker #pickerAte></mat-datepicker>
+      </div>
+      @if (filtroDataDe || filtroDataAte) {
+        <button class="busca-limpar" (click)="limparPeriodo()" title="Limpar período">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+
+      <button class="busca-buscar-btn" (click)="buscar()">
+        <mat-icon>search</mat-icon> Buscar
+      </button>
+    </div>
+
+    <!-- Tabela -->
+    <mat-card class="table-card">
+      @if (carregando) {
+        <div class="loading-center"><mat-spinner diameter="40"></mat-spinner></div>
+      } @else if (lancamentosFiltrados.length === 0) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">receipt_long</mat-icon>
+          <p>Nenhum lançamento encontrado.</p>
+          <button class="btn-criar" (click)="abrirNovo()">Criar agora</button>
+        </div>
+      } @else {
+        <table mat-table [dataSource]="lancamentosFiltrados" class="lancamentos-table">
+
+          <ng-container matColumnDef="dataLancamento">
+            <th mat-header-cell *matHeaderCellDef>Data</th>
+            <td mat-cell *matCellDef="let l">{{ formatarDataExibicao(l.dataLancamento) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dataVencimento">
+            <th mat-header-cell *matHeaderCellDef>Vencimento</th>
+            <td mat-cell *matCellDef="let l" [class.vencido]="l.dataVencimento && l.status === 'PENDENTE' && l.dataVencimento < hoje">
+              {{ formatarDataExibicao(l.dataVencimento) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="descricao">
+            <th mat-header-cell *matHeaderCellDef>Descrição</th>
+            <td mat-cell *matCellDef="let l">{{ l.descricao }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="centroCusto">
+            <th mat-header-cell *matHeaderCellDef>Centro de Custo</th>
+            <td mat-cell *matCellDef="let l">{{ getNomeCentroCusto(l.centroCustoId) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef>Tipo</th>
+            <td mat-cell *matCellDef="let l">
+              <span class="badge-tipo" [class.receita]="l.tipo === 'RECEITA'" [class.despesa]="l.tipo === 'DESPESA'">
+                {{ l.tipo === 'RECEITA' ? 'Receita' : 'Despesa' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="formaPagamento">
+            <th mat-header-cell *matHeaderCellDef>Pagamento</th>
+            <td mat-cell *matCellDef="let l">{{ formatarFormaPagamento(l.formaPagamento) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="valor">
+            <th mat-header-cell *matHeaderCellDef>Valor</th>
+            <td mat-cell *matCellDef="let l"
+                [class.valor-receita]="l.tipo === 'RECEITA'"
+                [class.valor-despesa]="l.tipo === 'DESPESA'">
+              {{ formatarValor(l.valorOriginal) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let l">
+              <span class="badge-status"
+                [class.pendente]="l.status === 'PENDENTE'"
+                [class.efetivado]="l.status === 'EFETIVADO'"
+                [class.cancelado]="l.status === 'CANCELADO'">
+                {{ l.status }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let l">
+              <div class="acoes-btns">
+                <button class="icon-btn btn-info" (click)="abrirDetalhes(l)" title="Detalhes">
+                  <mat-icon>info</mat-icon>
+                </button>
+                @if (l.status === 'PENDENTE') {
+                  <button class="icon-btn btn-efetivar" (click)="abrirEfetivar(l)" title="Efetivar">
+                    <mat-icon>check_circle</mat-icon>
+                  </button>
+                }
+                <button class="icon-btn btn-edit" (click)="editar(l)" title="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button class="icon-btn btn-excluir" (click)="pedirConfirmacaoExclusao(l)" title="Excluir">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
+        </table>
+      }
+    </mat-card>
+  </div>
+</div>
+
+<!-- Dialog de criação / edição -->
+<ng-template #formDialog>
+  <div class="dialog-header">
+    <h3 class="dialog-title">{{ editandoId ? 'Editar Lançamento' : 'Novo Lançamento' }}</h3>
+    <button class="dialog-close-btn" (click)="fecharFormulario()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" class="form-grid">
+      <div class="campo">
+        <label>Descrição</label>
+        <input formControlName="descricao" autocomplete="off" placeholder="Ex: Supermercado, Salário...">
+        @if (form.get('descricao')?.invalid && form.get('descricao')?.touched) {
+          <span class="campo-erro">Descrição é obrigatória</span>
+        }
+      </div>
+
+      <div class="campo">
+        <label>{{ exibeParcelas && form.value.numeroParcelas > 1 ? 'Valor da Parcela' : 'Valor' }}</label>
+        <input type="text" inputmode="decimal" autocomplete="off" placeholder="0,00"
+               [value]="valorOriginalDisplay" (input)="onValorOriginalInput($event)">
+        @if (exibeParcelas && form.value.numeroParcelas > 1 && form.value.valorOriginal) {
+          <span class="campo-hint">Total: {{ formatarValor(form.value.valorOriginal * form.value.numeroParcelas) }}</span>
+        }
+      </div>
+
+      <div class="campo">
+        <label>Tipo</label>
+        <select formControlName="tipo">
+          <option value="RECEITA">Receita</option>
+          <option value="DESPESA">Despesa</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Forma de Pagamento</label>
+        <select formControlName="formaPagamento">
+          <option [ngValue]="null">—</option>
+          @for (f of formasPagamento; track f) {
+            <option [ngValue]="f">{{ formatarFormaPagamento(f) }}</option>
+          }
+        </select>
+      </div>
+
+      @if (exibeParcelas) {
+        <div class="campo">
+          <label>Número de Parcelas</label>
+          <input type="text" inputmode="numeric" autocomplete="off" placeholder="1"
+                 [value]="numeroParcelasDisplay" (input)="onNumeroParcelasInput($event)"
+                 (focus)="selecionarTudoAoFocar($event)">
+          <span class="campo-hint">Máximo 60 parcelas</span>
+        </div>
+      }
+
+      @if (exibeCartao) {
+        <div class="campo">
+          <label>Cartão</label>
+          <select formControlName="cartaoCreditoId" (change)="onCartaoChange(form.value.cartaoCreditoId)">
+            <option [ngValue]="null">—</option>
+            @for (c of cartoes; track c.id) {
+              <option [ngValue]="c.id">{{ c.nome }}</option>
+            }
+            <option [ngValue]="NOVO_CARTAO" class="opcao-novo-centro">+ Novo cartão</option>
+          </select>
+          <span class="campo-hint">Necessário para agrupar a fatura no Dashboard</span>
+        </div>
+      }
+
+      <div class="campo">
+        <label>Centro de Custo</label>
+        <select formControlName="centroCustoId" (change)="onCentroCustoChange(form.value.centroCustoId)">
+          <option [ngValue]="null">—</option>
+          @for (c of centrosCusto; track c.id) {
+            <option [ngValue]="c.id">{{ c.nome }}</option>
+          }
+          <option [ngValue]="NOVO_CENTRO_CUSTO" class="opcao-novo-centro">+ Novo centro de custo</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Data Lançamento</label>
+        <div class="campo-data">
+          <input formControlName="dataLancamento" [matDatepicker]="pickerLanc" placeholder="dd/mm/aaaa" (click)="pickerLanc.open()">
+          <mat-datepicker-toggle [for]="pickerLanc"></mat-datepicker-toggle>
+        </div>
+        <mat-datepicker #pickerLanc></mat-datepicker>
+      </div>
+
+      <div class="campo">
+        <label>Data Vencimento</label>
+        <div class="campo-data">
+          <input formControlName="dataVencimento" [matDatepicker]="pickerVenc" placeholder="dd/mm/aaaa" (click)="pickerVenc.open()">
+          <mat-datepicker-toggle [for]="pickerVenc"></mat-datepicker-toggle>
+        </div>
+        <mat-datepicker #pickerVenc></mat-datepicker>
+      </div>
+
+      <div class="campo span-full">
+        <label>Observação</label>
+        <textarea formControlName="observacao" rows="2"></textarea>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="fecharFormulario()">Cancelar</button>
+    <button class="btn-outline-primario" (click)="salvar()" [disabled]="form.invalid || salvando">
+      @if (salvando) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>receipt_long</mat-icon> Salvar }
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Dialog de detalhes: mostra os dados completos do lançamento, incluindo a observação -->
+<ng-template #detalhesDialog>
+  <div class="dialog-header">
+    <h3 class="dialog-title">Detalhes do Lançamento</h3>
+    <button class="dialog-close-btn" (click)="fecharDetalhes()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div class="detalhes-conteudo" *ngIf="lancamentoDetalhes as l">
+      <div class="resumo-titulo">
+        <span class="resumo-descricao">{{ l.descricao }}</span>
+        <span class="resumo-valor" [class.receita]="l.tipo === 'RECEITA'" [class.despesa]="l.tipo === 'DESPESA'">
+          {{ formatarValor(l.valorOriginal) }}
+        </span>
+      </div>
+
+      <div class="detalhes-lista">
+        <div class="detalhes-item">
+          <span class="detalhes-label">Tipo</span>
+          <span class="badge-tipo" [class.receita]="l.tipo === 'RECEITA'" [class.despesa]="l.tipo === 'DESPESA'">
+            {{ l.tipo === 'RECEITA' ? 'Receita' : 'Despesa' }}
+          </span>
+        </div>
+        <div class="detalhes-item">
+          <span class="detalhes-label">Status</span>
+          <span class="badge-status"
+            [class.pendente]="l.status === 'PENDENTE'"
+            [class.efetivado]="l.status === 'EFETIVADO'"
+            [class.cancelado]="l.status === 'CANCELADO'">
+            {{ l.status }}
+          </span>
+        </div>
+        <div class="detalhes-item">
+          <span class="detalhes-label">Forma de Pagamento</span>
+          <span class="detalhes-valor">{{ formatarFormaPagamento(l.formaPagamento) }}</span>
+        </div>
+        <div class="detalhes-item">
+          <span class="detalhes-label">Centro de Custo</span>
+          <span class="detalhes-valor">{{ getNomeCentroCusto(l.centroCustoId) }}</span>
+        </div>
+        <div class="detalhes-item">
+          <span class="detalhes-label">Data Lançamento</span>
+          <span class="detalhes-valor">{{ formatarDataExibicao(l.dataLancamento) }}</span>
+        </div>
+        <div class="detalhes-item">
+          <span class="detalhes-label">Data Vencimento</span>
+          <span class="detalhes-valor">{{ formatarDataExibicao(l.dataVencimento) }}</span>
+        </div>
+        @if (l.grupoParcelaId) {
+          <div class="detalhes-item">
+            <span class="detalhes-label">Parcela</span>
+            <span class="detalhes-valor">{{ l.parcelaNumero }} de {{ l.numeroParcelas }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="detalhes-observacao">
+        <span class="detalhes-label">Observação</span>
+        <p>{{ l.observacao || 'Nenhuma observação registrada.' }}</p>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="fecharDetalhes()">Fechar</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Dialog de efetivar título: escolhe a conta que gera o lançamento bancário -->
+<ng-template #efetivarDialog>
+  <div class="dialog-header">
+    <h3 class="dialog-title">Efetivar Título</h3>
+    <button class="dialog-close-btn" (click)="fecharEfetivar()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div class="resumo-titulo" *ngIf="lancamentoEfetivando as l">
+      <span class="resumo-descricao">{{ l.descricao }}</span>
+      <span class="resumo-valor" [class.receita]="l.tipo === 'RECEITA'" [class.despesa]="l.tipo === 'DESPESA'">
+        {{ formatarValor(l.valor) }}
+      </span>
+    </div>
+
+    <form [formGroup]="formEfetivar" class="dialog-form">
+      <div class="campo conta-select" [class.aberto]="contaDropdownAberto">
+        <label>Conta</label>
+        <button type="button" class="conta-select-trigger" (click)="toggleContaDropdown()">
+          <ng-container *ngIf="contaEfetivarSelecionada as c; else semConta">
+            <span class="conta-opt-nome">{{ c.nome }} <span class="conta-opt-banco">({{ c.banco }})</span></span>
+            <span class="conta-opt-saldo" [class.saldo-positivo]="c.saldo >= 0" [class.saldo-negativo]="c.saldo < 0">{{ formatarValor(c.saldo) }}</span>
+          </ng-container>
+          <ng-template #semConta><span class="conta-select-placeholder">Selecione</span></ng-template>
+          <mat-icon class="conta-select-caret">expand_more</mat-icon>
+        </button>
+
+        <div class="conta-dropdown-backdrop" *ngIf="contaDropdownAberto" (click)="contaDropdownAberto = false"></div>
+        <div class="conta-dropdown-panel" *ngIf="contaDropdownAberto">
+          <ng-container *ngIf="contasBanco.length">
+            <div class="conta-dropdown-grupo">Bancos</div>
+            <button type="button" class="conta-opt" *ngFor="let c of contasBanco" (click)="selecionarContaEfetivar(c)">
+              <span class="conta-opt-nome">{{ c.nome }} <span class="conta-opt-banco">({{ c.banco }})</span></span>
+              <span class="conta-opt-dots"></span>
+              <span class="conta-opt-saldo" [class.saldo-positivo]="c.saldo >= 0" [class.saldo-negativo]="c.saldo < 0">{{ formatarValor(c.saldo) }}</span>
+            </button>
+          </ng-container>
+          <ng-container *ngIf="contasAplicacao.length">
+            <div class="conta-dropdown-grupo">Aplicações</div>
+            <button type="button" class="conta-opt" *ngFor="let c of contasAplicacao" (click)="selecionarContaEfetivar(c)">
+              <span class="conta-opt-nome">{{ c.nome }} <span class="conta-opt-banco">({{ c.banco }})</span></span>
+              <span class="conta-opt-dots"></span>
+              <span class="conta-opt-saldo" [class.saldo-positivo]="c.saldo >= 0" [class.saldo-negativo]="c.saldo < 0">{{ formatarValor(c.saldo) }}</span>
+            </button>
+          </ng-container>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="fecharEfetivar()">Cancelar</button>
+    <button class="btn-outline-primario" (click)="confirmarEfetivar()" [disabled]="formEfetivar.invalid || efetivando">
+      @if (efetivando) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>check_circle</mat-icon> Confirmar }
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Dialog de confirmação de exclusão -->
+<ng-template #confirmExclusaoDialog>
+  <div class="dialog-header dialog-header-perigo">
+    <h3 class="dialog-title dialog-title-perigo">Excluir lançamento</h3>
+    <button class="dialog-close-btn" (click)="cancelarExclusao()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div class="aviso-exclusao">
+      <mat-icon class="aviso-icon">warning</mat-icon>
+      <p>
+        Tem certeza que deseja excluir <strong>{{ lancamentoParaExcluir?.descricao }}</strong>?
+        Essa ação é <strong>permanente</strong>.
+      </p>
+    </div>
+    @if (lancamentoParaExcluir?.grupoParcelaId) {
+      <p class="aviso-parcelas">
+        Essa é a parcela {{ lancamentoParaExcluir?.parcelaNumero }} de {{ lancamentoParaExcluir?.numeroParcelas }}.
+        Você pode excluir só ela ou todas as parcelas dessa compra de uma vez.
+      </p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="acoes-exclusao">
+    <button class="btn-cancelar" (click)="cancelarExclusao()">Cancelar</button>
+    @if (lancamentoParaExcluir?.grupoParcelaId) {
+      <button class="btn-excluir-confirmar" (click)="confirmarExclusaoGrupo()" [disabled]="excluindo">
+        @if (excluindo) { <mat-spinner diameter="18"></mat-spinner> } @else { Excluir todas as {{ lancamentoParaExcluir?.numeroParcelas }} parcelas }
+      </button>
+      <button class="btn-excluir-confirmar" (click)="confirmarExclusao()" [disabled]="excluindo">
+        Excluir só esta
+      </button>
+    } @else {
+      <button class="btn-excluir-confirmar" (click)="confirmarExclusao()" [disabled]="excluindo">
+        @if (excluindo) { <mat-spinner diameter="18"></mat-spinner> } @else { Excluir definitivamente }
+      </button>
+    }
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Dialog de novo centro de custo (atalho a partir do formulário de lançamento) -->
+<ng-template #novoCentroCustoDialog>
+  <div class="dialog-header">
+    <h3 class="dialog-title">Novo Centro de Custo</h3>
+    <button class="dialog-close-btn" (click)="fecharNovoCentroCusto()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="formNovoCentroCusto" (ngSubmit)="salvarNovoCentroCusto()" class="dialog-form">
+      <div class="campo campo-avulso">
+        <label>Nome</label>
+        <input formControlName="nome" autocomplete="off" placeholder="Ex: Marketing, TI, Operações...">
+        @if (formNovoCentroCusto.get('nome')?.invalid && formNovoCentroCusto.get('nome')?.touched) {
+          <span class="campo-erro">Nome é obrigatório (mínimo 2 caracteres)</span>
+        }
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="fecharNovoCentroCusto()">Cancelar</button>
+    <button class="btn-outline-primario" (click)="salvarNovoCentroCusto()" [disabled]="formNovoCentroCusto.invalid || salvandoCentroCusto">
+      @if (salvandoCentroCusto) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>category</mat-icon> Salvar }
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Dialog de novo cartão (atalho a partir do formulário de lançamento) -->
+<ng-template #novoCartaoDialog>
+  <div class="dialog-header">
+    <h3 class="dialog-title">Novo Cartão</h3>
+    <button class="dialog-close-btn" (click)="fecharNovoCartao()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="formNovoCartao" (ngSubmit)="salvarNovoCartao()" class="dialog-form">
+      <div class="campo campo-avulso">
+        <label>Nome</label>
+        <input formControlName="nome" autocomplete="off" placeholder="Ex: Nubank, Inter, C6...">
+        @if (formNovoCartao.get('nome')?.invalid && formNovoCartao.get('nome')?.touched) {
+          <span class="campo-erro">Nome é obrigatório (mínimo 2 caracteres)</span>
+        }
+      </div>
+
+      <div class="campo campo-avulso">
+        <label>Limite</label>
+        <input type="text" inputmode="decimal" autocomplete="off" placeholder="0,00"
+               [value]="limiteNovoCartaoDisplay" (input)="onLimiteNovoCartaoInput($event)">
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="fecharNovoCartao()">Cancelar</button>
+    <button class="btn-outline-primario" (click)="salvarNovoCartao()" [disabled]="formNovoCartao.invalid || salvandoCartao">
+      @if (salvandoCartao) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>credit_card</mat-icon> Salvar }
+    </button>
+  </mat-dialog-actions>
+</ng-template>
