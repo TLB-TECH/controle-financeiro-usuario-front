@@ -1,59 +1,94 @@
-# ControleFinanceiroFront
+# Controle Financeiro — Front-end
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.7.
+Front-end em Angular do sistema Controle Financeiro (TLB TECH). Consome o `api-gateway`, que roteia as
+requisições para os microsserviços do back-end (`ms-usuarios`, `ms-lancamentos`, `ms-centro-custo`,
+`ms-fluxo-caixa`, `ms-contas`, `ms-orcamento`).
 
-## Development server
+## Stack
 
-To start a local development server, run:
+- Angular 20 (standalone components, lazy loading por rota)
+- Angular Material + Angular CDK
+- Chart.js / ng2-charts para os gráficos do dashboard
+- RxJS
 
-```bash
-ng serve
+## Funcionalidades
+
+- **Autenticação**: login, cadastro, recuperação e redefinição de senha (`AuthService`, `authGuard`,
+  `auth.interceptor`)
+- **Dashboard**: visão geral com gráficos
+- **Lançamentos**: lançamentos financeiros, incluindo cartão de crédito e parcelamento
+- **Contas**: cadastro de contas, extrato e transferência entre contas
+- **Cartões de crédito**: gestão de cartões e orçamento por cartão
+- **Centro de custo**: cadastro e vínculo com lançamentos
+- **Orçamentos e metas**: orçamentos gerais, por cartão, e metas de aplicação
+- **Tipos de conta**: cadastro de tipos de conta
+- **Assinatura**: tela de assinatura integrada ao Mercado Pago (`assinatura.interceptor`,
+  `AssinaturaService`)
+- **Perfil**: dados e foto do usuário
+
+## Configuração de ambiente
+
+As URLs dos serviços ficam em `src/environments/environment.ts` (dev) e `environment.prod.ts` (prod):
+
+```ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8080',  // api-gateway
+  bffUrl: 'http://localhost:8085',  // bff-financeiro
+};
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Ajuste esses valores conforme o ambiente onde o back-end estiver rodando.
 
-## Code scaffolding
+## Rodando o projeto
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Instalar dependências:
 
 ```bash
-ng generate --help
+npm install
 ```
 
-## Building
-
-To build the project run:
+Subir o servidor de desenvolvimento:
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+A aplicação fica disponível em `http://localhost:4200/` e recarrega automaticamente a cada alteração
+nos arquivos-fonte. É necessário o `api-gateway` (e os microsserviços por trás dele) rodando para a
+aplicação funcionar de fato — sem back-end, as telas carregam mas as chamadas à API falham.
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Build
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
+Gera os artefatos de produção em `dist/`.
 
-For end-to-end (e2e) testing, run:
+## Testes
 
 ```bash
-ng e2e
+npm test
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Executa os testes unitários com Karma/Jasmine.
 
-## Additional Resources
+## Estrutura
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```
+src/app/
+├── components/     # componentes compartilhados (sidebar, footer)
+├── guards/         # authGuard
+├── interceptors/    # auth.interceptor, assinatura.interceptor
+├── pages/          # uma pasta por tela (login, dashboard, lancamentos, contas, cartoes, ...)
+├── services/        # um service HTTP por domínio (auth, conta, lancamento, cartao-credito, ...)
+└── shared/          # utilitários compartilhados (ex.: adapter de datas em pt-BR)
+```
+
+## Repositórios relacionados
+
+Este front-end faz parte do sistema **TLB TECH Controle Financeiro**, composto por múltiplos
+repositórios de microsserviços em Java/Spring Boot (`api-gateway`, `bff-financeiro`, `ms-usuarios`,
+`ms-lancamentos`, `ms-centro-custo`, `ms-fluxo-caixa`, `ms-contas`, `ms-orcamento`,
+`ms-notificacao`) sob a organização `TLB-TECH` no GitHub.
