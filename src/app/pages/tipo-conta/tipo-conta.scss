@@ -1,0 +1,267 @@
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background: var(--cor-fundo);
+}
+
+.main-content {
+  margin-left: 240px;
+  padding: 32px;
+  flex: 1;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--cor-primaria);
+  margin: 0;
+}
+
+.tlb-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gradiente-btn);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  mat-icon { font-size: 1.1rem; height: 20px; width: 20px; }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:not(:disabled):hover { opacity: 0.9; }
+}
+
+// ---- Filtros ----
+.filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.filtro-btn {
+  padding: 6px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 200, 240, 0.25);
+  background: transparent;
+  color: #4a7a9b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: var(--cor-primaria);
+    color: var(--cor-primaria);
+  }
+
+  &.active {
+    background: var(--cor-primaria);
+    border-color: var(--cor-primaria);
+    color: #050e1a;
+    font-weight: 600;
+  }
+}
+
+// ---- Dialog ----
+.full-width { width: 100%; margin-bottom: 8px; }
+
+.dialog-form { padding-top: 8px; }
+
+.btn-cancelar {
+  background: transparent;
+  border: 1px solid rgba(0, 200, 240, 0.25);
+  border-radius: 8px;
+  color: #4a7a9b;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  &:hover { border-color: #ff5252; color: #ff5252; }
+}
+
+.btn-salvar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradiente-btn);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 8px 24px;
+  cursor: pointer;
+  min-width: 90px;
+  &:hover:not(:disabled) { opacity: 0.9; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ---- Tabela ----
+.table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.tipos-table {
+  width: 100%;
+  background: transparent;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 32px;
+  gap: 16px;
+  color: #4a7a9b;
+
+  p { margin: 0; }
+}
+
+.empty-state mat-icon {
+  font-size: 3rem;
+  height: 48px;
+  width: 48px;
+  opacity: 0.4;
+}
+
+// ---- Badge de categoria ----
+.badge-categoria {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+
+  &.banco {
+    background: rgba(0, 200, 240, 0.15);
+    color: var(--cor-primaria);
+  }
+
+  &.aplicacao {
+    background: rgba(105, 240, 174, 0.15);
+    color: #69f0ae;
+  }
+}
+
+// ---- Badge de status ----
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.3px;
+
+  &.ativo {
+    background: rgba(0, 230, 118, 0.12);
+    color: #00e676;
+  }
+
+  &.inativo {
+    background: rgba(255, 82, 82, 0.1);
+    color: #ff5252;
+  }
+}
+
+.confirm-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.confirm-text {
+  font-size: 0.8rem;
+  color: #ff5252;
+  margin-right: 4px;
+}
+
+// ---- Angular Material overrides ----
+::ng-deep {
+  .tipos-table {
+    .mat-mdc-header-row { background: rgba(0, 200, 240, 0.05); }
+    .mat-mdc-header-cell {
+      color: var(--cor-primaria);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      border-bottom-color: rgba(0, 200, 240, 0.1);
+    }
+    .mat-mdc-cell {
+      color: #e0e0e0;
+      border-bottom-color: rgba(0, 200, 240, 0.05);
+    }
+    .mat-mdc-row:hover { background: rgba(0, 200, 240, 0.04); }
+  }
+
+  // ---- Cores dos botões de ação ----
+  .btn-edit mat-icon     { color: #ffd740; }
+  .btn-inativar mat-icon { color: #ff5252; }
+  .btn-confirm mat-icon  { color: #00e676; }
+  .btn-cancel mat-icon   { color: #ff5252; }
+  .btn-reativar mat-icon { color: #00e676; }
+  .btn-excluir mat-icon  { color: #ff5252; }
+}
+
+// ---- Dialog de exclusão (aviso) ----
+.dialog-header-perigo::before {
+  background: #ff5252 !important;
+}
+
+.dialog-title-perigo {
+  color: #ff5252 !important;
+}
+
+.aviso-exclusao {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 4px 0 12px;
+
+  .aviso-icon {
+    color: #ffd740;
+    flex-shrink: 0;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  p {
+    margin: 0;
+    color: #cdd9e5;
+    font-size: 0.9rem;
+    line-height: 1.5;
+
+    strong { color: #fff; }
+  }
+}
+
+.btn-excluir-confirmar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ff5252;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 8px 24px;
+  cursor: pointer;
+  min-width: 90px;
+  &:hover:not(:disabled) { opacity: 0.85; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}

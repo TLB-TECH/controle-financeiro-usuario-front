@@ -1,0 +1,119 @@
+<div class="page-wrapper">
+    <app-sidebar activePage="contas" />
+
+    <main class="main-content">
+        <div class="page-header">
+            <div class="header-titulo">
+                <div>
+                    <h1 class="page-title">{{ conta?.nome }}</h1>
+                    <span class="subtitulo" *ngIf="conta">{{ conta.banco }} · {{ conta.tipoConta.nome }}</span>
+                </div>
+            </div>
+        </div>
+
+        <mat-card class="table-card filtros-card">
+            <div class="filtros-extrato">
+                <mat-form-field appearance="outline" class="filtro-data">
+                    <mat-label>De</mat-label>
+                    <input matInput [matDatepicker]="pickerDe" [(ngModel)]="filtroDataDe">
+                    <mat-datepicker-toggle matIconSuffix [for]="pickerDe"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerDe></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filtro-data">
+                    <mat-label>Até</mat-label>
+                    <input matInput [matDatepicker]="pickerAte" [(ngModel)]="filtroDataAte">
+                    <mat-datepicker-toggle matIconSuffix [for]="pickerAte"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerAte></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filtro-origem">
+                    <mat-label>Origem</mat-label>
+                    <mat-select [(ngModel)]="filtroOrigem">
+                        <mat-option *ngFor="let o of origens" [value]="o.valor">{{ o.label }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <div class="tipo-toggle filtro-tipo">
+                    <button type="button" class="tipo-btn" [class.ativo]="filtroTipo === 'TODOS'"
+                        (click)="filtroTipo = 'TODOS'">Todos</button>
+                    <button type="button" class="tipo-btn" [class.ativo]="filtroTipo === 'ENTRADA'"
+                        (click)="filtroTipo = 'ENTRADA'">Entrada</button>
+                    <button type="button" class="tipo-btn" [class.ativo]="filtroTipo === 'SAIDA'"
+                        (click)="filtroTipo = 'SAIDA'">Saída</button>
+                </div>
+
+                <button class="btn-limpar-filtro" (click)="limparFiltros()" *ngIf="temFiltroAtivo" title="Limpar filtros">
+                    <mat-icon>close</mat-icon> Limpar filtros
+                </button>
+
+                <div class="saldo-atual" *ngIf="conta">
+                    <span class="saldo-lbl">Saldo atual</span>
+                    <span class="saldo-val" [class.saldo-negativo]="conta.saldo < 0">{{ fmt(conta.saldo) }}</span>
+                </div>
+            </div>
+        </mat-card>
+
+        <mat-card class="table-card">
+            <table mat-table [dataSource]="extrato" class="contas-table">
+
+                <ng-container matColumnDef="data">
+                    <th mat-header-cell *matHeaderCellDef>Data</th>
+                    <td mat-cell *matCellDef="let l">{{ fmtData(l.data) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="descricao">
+                    <th mat-header-cell *matHeaderCellDef>Descrição</th>
+                    <td mat-cell *matCellDef="let l">{{ l.descricao || '—' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="origem">
+                    <th mat-header-cell *matHeaderCellDef>Origem</th>
+                    <td mat-cell *matCellDef="let l">
+                        <span class="badge badge-origem" [attr.data-origem]="l.origem">{{ origemLabel(l.origem) }}</span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="tipo">
+                    <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                    <td mat-cell *matCellDef="let l">
+                        <span class="badge" [class.badge-entrada]="l.tipo === 'ENTRADA'" [class.badge-saida]="l.tipo === 'SAIDA'">
+                            {{ l.tipo === 'ENTRADA' ? 'Entrada' : 'Saída' }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="valor">
+                    <th mat-header-cell *matHeaderCellDef>Valor</th>
+                    <td mat-cell *matCellDef="let l" class="saldo-cell"
+                        [class.saldo-positivo]="l.tipo === 'ENTRADA'" [class.saldo-negativo]="l.tipo === 'SAIDA'">
+                        {{ fmt(l.valor) }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="saldoAcumulado">
+                    <th mat-header-cell *matHeaderCellDef>Saldo</th>
+                    <td mat-cell *matCellDef="let l" class="saldo-cell"
+                        [class.saldo-positivo]="l.saldoAcumulado >= 0" [class.saldo-negativo]="l.saldoAcumulado < 0">
+                        {{ fmt(l.saldoAcumulado) }}
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+                <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
+
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="empty-state" [attr.colspan]="colunas.length">
+                        Nenhum lançamento nesta conta ainda.
+                    </td>
+                </tr>
+            </table>
+        </mat-card>
+
+        <div class="footer-actions">
+            <button class="btn-voltar" (click)="voltar()" title="Voltar para Contas Bancárias">
+                <mat-icon>arrow_back</mat-icon> Voltar
+            </button>
+        </div>
+    </main>
+</div>

@@ -6,21 +6,66 @@
 
   <ul class="sidebar-nav">
     <li>
-      <a routerLink="/dashboard" class="nav-item" [class.active]="activePage === 'dashboard'">
+      <a routerLink="/dashboard" class="nav-item" [class.active]="itemAtivo('dashboard')">
         <mat-icon>dashboard</mat-icon>
         <span>Dashboard</span>
       </a>
     </li>
     <li>
-      <a routerLink="/lancamentos" class="nav-item" [class.active]="activePage === 'lancamentos'">
-        <mat-icon>receipt_long</mat-icon>
-        <span>Lançamentos</span>
+      <div class="nav-item-group">
+        <a routerLink="/lancamentos" class="nav-item"
+          [class.active]="itemAtivo('lancamentos') || grupoAberto('lancamentos')">
+          <mat-icon>receipt_long</mat-icon>
+          <span>Lançamentos</span>
+        </a>
+        <button class="nav-toggle" [class.open]="grupoAberto('lancamentos')"
+          (click)="toggleGrupo('lancamentos', $event)" title="Expandir/recolher">
+          <mat-icon>expand_more</mat-icon>
+        </button>
+      </div>
+    </li>
+    @if (grupoAberto('lancamentos')) {
+    <li>
+      <a routerLink="/centro-custo" class="nav-item nav-subitem" [class.active]="activePage === 'centro-custo'">
+        <mat-icon>category</mat-icon>
+        <span>Centro de Custo</span>
       </a>
     </li>
     <li>
-      <a routerLink="/centro-custo" class="nav-item" [class.active]="activePage === 'centro-custo'">
-        <mat-icon>category</mat-icon>
-        <span>Centro de Custo</span>
+      <a routerLink="/cartoes" class="nav-item nav-subitem" [class.active]="activePage === 'cartoes'">
+        <mat-icon>credit_card</mat-icon>
+        <span>Cartões</span>
+      </a>
+    </li>
+    }
+    <li>
+      <a routerLink="/contas" class="nav-item" [class.active]="itemAtivo('contas')">
+        <mat-icon>account_balance</mat-icon>
+        <span>Contas Bancárias</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/orcamentos" class="nav-item" [class.active]="itemAtivo('orcamentos')">
+        <mat-icon>savings</mat-icon>
+        <span>Orçamentos</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/orcamento-cartoes" class="nav-item" [class.active]="itemAtivo('orcamento-cartoes')">
+        <mat-icon>credit_score</mat-icon>
+        <span>Orçamento de Cartões de Crédito</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/metas" class="nav-item" [class.active]="itemAtivo('metas')">
+        <mat-icon>flag</mat-icon>
+        <span>Metas de Aplicação</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/perfil" class="nav-item" [class.active]="itemAtivo('perfil')">
+        <mat-icon>manage_accounts</mat-icon>
+        <span>Perfil</span>
       </a>
     </li>
     <li>
@@ -37,8 +82,10 @@
       © {{ ano }}&nbsp;TLB TECH
       <a href="https://wa.me/5547988520926" target="_blank" class="footer-wpp" title="WhatsApp">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.523 5.847L.057 23.5l5.797-1.519A11.933 11.933 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.817 9.817 0 01-5.002-1.368l-.358-.214-3.44.902.92-3.352-.234-.373A9.818 9.818 0 0112 2.182c5.424 0 9.818 4.394 9.818 9.818 0 5.425-4.394 9.818-9.818 9.818z"/>
+          <path
+            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+          <path
+            d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.523 5.847L.057 23.5l5.797-1.519A11.933 11.933 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.817 9.817 0 01-5.002-1.368l-.358-.214-3.44.902.92-3.352-.234-.373A9.818 9.818 0 0112 2.182c5.424 0 9.818 4.394 9.818 9.818 0 5.425-4.394 9.818-9.818 9.818z" />
         </svg>
       </a>
     </div>

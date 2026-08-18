@@ -1,0 +1,167 @@
+<div class="page-wrapper">
+
+  <app-sidebar activePage="tipo-conta"></app-sidebar>
+
+  <main class="main-content">
+
+    <div class="page-header">
+      <h1 class="page-title">Tipos de Conta</h1>
+      <button class="tlb-btn-primary" (click)="abrirNovo()">
+        <mat-icon>add</mat-icon>
+        Novo
+      </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros">
+      <button class="filtro-btn" [class.active]="filtroAtivo === true"  (click)="setFiltro(true)">Ativos</button>
+      <button class="filtro-btn" [class.active]="filtroAtivo === false" (click)="setFiltro(false)">Inativos</button>
+      <button class="filtro-btn" [class.active]="filtroAtivo === null"  (click)="setFiltro(null)">Todos</button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-card tlb-card">
+
+      @if (carregando) {
+        <div class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else if (tipos.length === 0) {
+        <div class="empty-state">
+          <mat-icon>sell</mat-icon>
+          <p>Nenhum tipo de conta encontrado.</p>
+          @if (filtroAtivo !== false) {
+            <button class="tlb-btn-primary" (click)="abrirNovo()">Cadastrar agora</button>
+          }
+        </div>
+      } @else {
+        <table mat-table [dataSource]="tipos" class="tipos-table">
+
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Nome</th>
+            <td mat-cell *matCellDef="let tipo">{{ tipo.nome }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="categoria">
+            <th mat-header-cell *matHeaderCellDef>Categoria</th>
+            <td mat-cell *matCellDef="let tipo">
+              <span class="badge-categoria" [class.banco]="tipo.categoria === 'BANCO'"
+                [class.aplicacao]="tipo.categoria === 'APLICACAO'">
+                {{ labelCategoria(tipo.categoria) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let tipo">
+              <span class="badge" [class.ativo]="tipo.ativo" [class.inativo]="!tipo.ativo">
+                {{ tipo.ativo ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let tipo">
+              @if (tipo.ativo && confirmarInativacaoId === tipo.id) {
+                <span class="confirm-delete">
+                  <span class="confirm-text">Confirmar inativação?</span>
+                  <button mat-icon-button class="btn-confirm" (click)="inativar(tipo.id!)" title="Confirmar">
+                    <mat-icon>check</mat-icon>
+                  </button>
+                  <button mat-icon-button class="btn-cancel" (click)="cancelarInativacao()" title="Cancelar">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </span>
+              } @else if (tipo.ativo) {
+                <button mat-icon-button class="btn-edit" (click)="editar(tipo)" title="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button class="btn-inativar" (click)="pedirConfirmacaoInativacao(tipo.id!)" title="Inativar">
+                  <mat-icon>block</mat-icon>
+                </button>
+              } @else {
+                <button mat-icon-button class="btn-reativar" (click)="reativar(tipo.id!)" title="Reativar">
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+                <button mat-icon-button class="btn-excluir" (click)="pedirConfirmacaoExclusao(tipo)" title="Excluir">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
+        </table>
+      }
+
+    </div>
+  </main>
+</div>
+
+<!-- Dialog de criação / edição -->
+<ng-template #formDialog>
+  <div class="dialog-header">
+    <h3 class="dialog-title">{{ editandoId ? 'Editar Tipo de Conta' : 'Novo Tipo de Conta' }}</h3>
+    <button class="dialog-close-btn" (click)="fecharFormulario()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="dialog-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nome</mat-label>
+        <input matInput formControlName="nome" placeholder="Ex: Corrente, CDB, Cripto...">
+        @if (form.get('nome')?.invalid && form.get('nome')?.touched) {
+          <mat-error>Nome é obrigatório (mínimo 2 caracteres)</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Categoria</mat-label>
+        <mat-select formControlName="categoria">
+          <mat-option value="BANCO">Banco</mat-option>
+          <mat-option value="APLICACAO">Aplicação</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="fecharFormulario()">Cancelar</button>
+    <button class="btn-salvar" (click)="salvar()" [disabled]="form.invalid || salvando">
+      @if (salvando) { <mat-spinner diameter="18"></mat-spinner> } @else { Salvar }
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Dialog de confirmação de exclusão -->
+<ng-template #confirmExclusaoDialog>
+  <div class="dialog-header dialog-header-perigo">
+    <h3 class="dialog-title dialog-title-perigo">Excluir tipo de conta</h3>
+    <button class="dialog-close-btn" (click)="cancelarExclusao()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div class="aviso-exclusao">
+      <mat-icon class="aviso-icon">warning</mat-icon>
+      <p>
+        Tem certeza que deseja excluir <strong>{{ tipoParaExcluir?.nome }}</strong>?
+        Essa ação é <strong>permanente</strong> e você vai perder todo o histórico de
+        contas vinculadas a este tipo.
+      </p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="cancelarExclusao()">Cancelar</button>
+    <button class="btn-excluir-confirmar" (click)="confirmarExclusao()" [disabled]="excluindo">
+      @if (excluindo) { <mat-spinner diameter="18"></mat-spinner> } @else { Excluir definitivamente }
+    </button>
+  </mat-dialog-actions>
+</ng-template>

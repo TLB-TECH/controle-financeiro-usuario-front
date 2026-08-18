@@ -38,4 +38,8 @@ export class CentroCustoService {
   reativar(id: number): Observable<CentroCustoDTO> {
     return this.http.patch<CentroCustoDTO>(`${this.apiUrl}/${id}/reativar`, {});
   }
+
+  excluir(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}/excluir`);
+  }
 }

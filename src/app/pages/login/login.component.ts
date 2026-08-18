@@ -81,7 +81,7 @@ export class LoginComponent {
       next: () => this.router.navigate(['/dashboard']),
       error: (err) => {
         this.erro = err.status === 401
-          ? 'E-mail ou senha incorretos.'
+          ? 'E-mail ou senha inválidos.'
           : 'Erro ao conectar. Tente novamente.';
         this.carregando = false;
       }

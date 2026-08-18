@@ -6,109 +6,144 @@
 
     <div class="page-header">
       <h1 class="page-title">Centro de Custo</h1>
-      @if (filtroAtivo !== false) {
-      <button class="tlb-btn-primary" (click)="abrirNovo()">
+      <button class="btn-outline-primario" (click)="abrirNovo()">
         <mat-icon>add</mat-icon>
         Novo
       </button>
-      }
     </div>
 
     <!-- Filtros -->
     <div class="filtros">
-      <button class="filtro-btn" [class.active]="filtroAtivo === true" (click)="setFiltro(true)">Ativos</button>
+      <button class="filtro-btn" [class.active]="filtroAtivo === true"  (click)="setFiltro(true)">Ativos</button>
       <button class="filtro-btn" [class.active]="filtroAtivo === false" (click)="setFiltro(false)">Inativos</button>
-      <button class="filtro-btn" [class.active]="filtroAtivo === null" (click)="setFiltro(null)">Todos</button>
+      <button class="filtro-btn" [class.active]="filtroAtivo === null"  (click)="setFiltro(null)">Todos</button>
     </div>
-
-    <!-- Formulário Inline -->
-    @if (mostrarFormulario) {
-    <div class="form-card tlb-card">
-      <h2 class="form-title">{{ editandoId ? 'Editar' : 'Novo' }} Centro de Custo</h2>
-      <form [formGroup]="form" (ngSubmit)="salvar()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nome</mat-label>
-          <input matInput formControlName="nome" placeholder="Ex: Marketing, TI, Operações...">
-          @if (form.get('nome')?.invalid && form.get('nome')?.touched) {
-          <mat-error>Nome é obrigatório (mínimo 2 caracteres)</mat-error>
-          }
-        </mat-form-field>
-        <div class="form-actions">
-          <button type="button" mat-stroked-button (click)="fecharFormulario()">Cancelar</button>
-          <button type="submit" class="tlb-btn-primary" [disabled]="form.invalid || salvando">
-            {{ salvando ? 'Salvando...' : (editandoId ? 'Atualizar' : 'Salvar') }}
-          </button>
-        </div>
-      </form>
-    </div>
-    }
 
     <!-- Tabela -->
     <div class="table-card tlb-card">
 
       @if (carregando) {
-      <div class="loading-state">
-        <mat-spinner diameter="40"></mat-spinner>
-      </div>
+        <div class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
       } @else if (centros.length === 0) {
-      <div class="empty-state">
-        <mat-icon>category</mat-icon>
-        <p>Nenhum centro de custo encontrado.</p>
-        @if (filtroAtivo !== false) {
-        <button class="tlb-btn-primary" (click)="abrirNovo()">Cadastrar agora</button>
-        }
-      </div>
+        <div class="empty-state">
+          <mat-icon>category</mat-icon>
+          <p>Nenhum centro de custo encontrado.</p>
+          @if (filtroAtivo !== false) {
+            <button class="btn-outline-primario" (click)="abrirNovo()">Cadastrar agora</button>
+          }
+        </div>
       } @else {
-      <table mat-table [dataSource]="centros" class="centros-table">
+        <table mat-table [dataSource]="centros" class="centros-table">
 
-        <ng-container matColumnDef="nome">
-          <th mat-header-cell *matHeaderCellDef>Nome</th>
-          <td mat-cell *matCellDef="let centro">{{ centro.nome }}</td>
-        </ng-container>
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Nome</th>
+            <td mat-cell *matCellDef="let centro">{{ centro.nome }}</td>
+          </ng-container>
 
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let centro">
-            <span class="badge" [class.ativo]="centro.ativo" [class.inativo]="!centro.ativo">
-              {{ centro.ativo ? 'Ativo' : 'Inativo' }}
-            </span>
-          </td>
-        </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let centro">
+              <span class="badge" [class.ativo]="centro.ativo" [class.inativo]="!centro.ativo">
+                {{ centro.ativo ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+          </ng-container>
 
-        <ng-container matColumnDef="acoes">
-          <th mat-header-cell *matHeaderCellDef>Ações</th>
-          <td mat-cell *matCellDef="let centro">
-            @if (centro.ativo && confirmarInativacaoId === centro.id) {
-            <span class="confirm-delete">
-              <span class="confirm-text">Confirmar inativação?</span>
-              <button mat-icon-button class="btn-confirm" (click)="inativar(centro.id!)" title="Confirmar">
-                <mat-icon>check</mat-icon>
-              </button>
-              <button mat-icon-button class="btn-cancel" (click)="cancelarInativacao()" title="Cancelar">
-                <mat-icon>close</mat-icon>
-              </button>
-            </span>
-            } @else if (centro.ativo) {
-            <button mat-icon-button class="btn-edit" (click)="editar(centro)" title="Editar">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button class="btn-inativar" (click)="pedirConfirmacaoInativacao(centro.id!)"
-              title="Inativar">
-              <mat-icon>block</mat-icon>
-            </button>
-            } @else {
-            <button mat-icon-button class="btn-reativar" (click)="reativar(centro.id!)" title="Reativar">
-              <mat-icon>check_circle</mat-icon>
-            </button>
-            }
-          </td>
-        </ng-container>
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let centro">
+              @if (centro.ativo && confirmarInativacaoId === centro.id) {
+                <span class="confirm-delete">
+                  <span class="confirm-text">Confirmar inativação?</span>
+                  <button mat-icon-button class="btn-confirm" (click)="inativar(centro.id!)" title="Confirmar">
+                    <mat-icon>check</mat-icon>
+                  </button>
+                  <button mat-icon-button class="btn-cancel" (click)="cancelarInativacao()" title="Cancelar">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </span>
+              } @else if (centro.ativo) {
+                <button mat-icon-button class="btn-edit" (click)="editar(centro)" title="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button class="btn-inativar" (click)="pedirConfirmacaoInativacao(centro.id!)" title="Inativar">
+                  <mat-icon>block</mat-icon>
+                </button>
+              } @else {
+                <button mat-icon-button class="btn-reativar" (click)="reativar(centro.id!)" title="Reativar">
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+                <button mat-icon-button class="btn-excluir" (click)="pedirConfirmacaoExclusao(centro)" title="Excluir">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="colunas"></tr>
-        <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
-      </table>
+          <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
+        </table>
       }
 
     </div>
   </main>
 </div>
+
+<!-- Dialog de criação / edição -->
+<ng-template #formDialog>
+  <div class="dialog-header">
+    <h3 class="dialog-title">{{ editandoId ? 'Editar Centro de Custo' : 'Novo Centro de Custo' }}</h3>
+    <button class="dialog-close-btn" (click)="fecharFormulario()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="dialog-form">
+      <div class="campo campo-avulso">
+        <label>Nome</label>
+        <input formControlName="nome" autocomplete="off" placeholder="Ex: Marketing, TI, Operações...">
+        @if (form.get('nome')?.invalid && form.get('nome')?.touched) {
+          <span class="campo-erro">Nome é obrigatório (mínimo 2 caracteres)</span>
+        }
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="fecharFormulario()">Cancelar</button>
+    <button class="btn-outline-primario" (click)="salvar()" [disabled]="form.invalid || salvando">
+      @if (salvando) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>category</mat-icon> Salvar }
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Dialog de confirmação de exclusão -->
+<ng-template #confirmExclusaoDialog>
+  <div class="dialog-header dialog-header-perigo">
+    <h3 class="dialog-title dialog-title-perigo">Excluir centro de custo</h3>
+    <button class="dialog-close-btn" (click)="cancelarExclusao()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div class="aviso-exclusao">
+      <mat-icon class="aviso-icon">warning</mat-icon>
+      <p>
+        Tem certeza que deseja excluir <strong>{{ centroParaExcluir?.nome }}</strong>?
+        Essa ação é <strong>permanente</strong> e você vai perder todo o histórico de
+        lançamentos e orçamentos vinculados a este centro de custo.
+      </p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="cancelarExclusao()">Cancelar</button>
+    <button class="btn-excluir-confirmar" (click)="confirmarExclusao()" [disabled]="excluindo">
+      @if (excluindo) { <mat-spinner diameter="18"></mat-spinner> } @else { Excluir definitivamente }
+    </button>
+  </mat-dialog-actions>
+</ng-template>

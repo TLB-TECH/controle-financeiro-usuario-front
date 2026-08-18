@@ -1,0 +1,233 @@
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: var(--cor-fundo);
+}
+
+.main-content {
+    margin-left: 240px;
+    padding: 32px;
+    flex: 1;
+}
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--cor-primaria);
+    margin: 0;
+}
+
+.form-card {
+    max-width: 640px;
+    margin: 0 auto 24px;
+    padding: 24px;
+    background: var(--cor-fundo-card) !important;
+    border: 1px solid var(--cor-borda) !important;
+    border-radius: var(--raio-card) !important;
+    box-shadow: var(--sombra-card) !important;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: var(--cor-primaria);
+        border-radius: var(--raio-card) var(--raio-card) 0 0;
+        opacity: 0.8;
+    }
+}
+
+.form-title {
+    font-size: 1rem;
+    color: var(--cor-primaria);
+    margin: 0 0 20px;
+}
+
+.info-line {
+    color: #e0e0e0;
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+
+    .label {
+        color: #4a7a9b;
+        margin-right: 8px;
+    }
+}
+
+.campo-tlb {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+    margin-bottom: 16px;
+
+    label {
+        color: #4a7a9b;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    input {
+        background: var(--cor-fundo-input);
+        border: 1px solid var(--cor-borda);
+        border-radius: var(--raio-input);
+        color: #cdd9e5;
+        font-size: 0.9rem;
+        padding: 10px 12px;
+        width: 100%;
+        box-sizing: border-box;
+        font-family: inherit;
+
+        &:hover {
+            border-color: var(--cor-borda-hover);
+        }
+
+        &:focus {
+            outline: none;
+            border-color: var(--cor-primaria);
+        }
+
+        &:-webkit-autofill,
+        &:-webkit-autofill:hover,
+        &:-webkit-autofill:focus,
+        &:-webkit-autofill:active {
+            -webkit-text-fill-color: #cdd9e5 !important;
+            -webkit-box-shadow: 0 0 0 1000px var(--cor-fundo-input) inset !important;
+            box-shadow: 0 0 0 1000px var(--cor-fundo-input) inset !important;
+            caret-color: var(--cor-primaria);
+            transition: background-color 5000s ease-in-out 0s;
+        }
+    }
+
+    .campo-hint {
+        color: #4a7a9b;
+        font-size: 0.7rem;
+    }
+}
+
+.campo-senha-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    input {
+        padding-right: 44px;
+    }
+
+    .btn-toggle-senha {
+        position: absolute;
+        right: 2px;
+        top: 46%;
+        transform: translateY(-50%);
+        color: #4a7a9b;
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+        }
+
+        &:hover {
+            color: var(--cor-primaria);
+        }
+    }
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.btn-outline-primario {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--cor-primaria);
+    border: 1px solid var(--cor-primaria);
+    border-radius: var(--raio-input);
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover:not(:disabled) { background: rgba(0, 200, 240, 0.12); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.danger-card {
+    border: 1px solid rgba(255, 82, 82, 0.2) !important;
+}
+
+.danger-title {
+    color: #ff5252;
+}
+
+.danger-desc {
+    color: #4a7a9b;
+    font-size: 0.875rem;
+    margin: 0 0 16px;
+}
+
+// O mat-stroked-button (M3) ignora "color"/"border-color" soltos e os tokens --mdc-* também
+// não pegavam nessa versão do Material — só um !important direto na cor real resolve.
+.btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #ff5252 !important;
+    border-color: var(--cor-borda) !important;
+
+    ::ng-deep .mat-icon {
+        color: #ff5252 !important;
+    }
+
+    &:hover {
+        border-color: var(--cor-borda-hover) !important;
+    }
+}
+
+.btn-danger-solid {
+    background: #ff5252;
+    color: white;
+}
+
+.btn-cancelar {
+    background: transparent;
+    border: 1px solid rgba(0, 200, 240, 0.25);
+    border-radius: var(--raio-input);
+    color: #4a7a9b;
+    padding: 8px 18px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+
+    &:hover { border-color: #ff5252; color: #ff5252; }
+}
+
+.confirm-text {
+    color: #ff5252;
+    font-size: 0.875rem;
+    margin: 0 0 12px;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 12px;
+}

@@ -3,26 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment.prod';
 
+export interface LoginRequest { email: string; senha: string; }
+export interface LoginResponse { token: string; }
+export interface CadastroRequest { nome: string; email: string; senha: string; }
+export interface AlterarSenhaRequest { senhaAtual: string; novaSenha: string; }
 
-
-export interface LoginRequest {
-  email: string;
-  senha: string;
-}
-
-export interface LoginResponse {
-  token: string;
-}
-
-export interface CadastroRequest {
-  nome: string;
-  email: string;
-  senha: string;
-}
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
 
   private http = inject(HttpClient);
@@ -30,7 +16,7 @@ export class AuthService {
 
   login(dados: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, dados).pipe(
-      tap(response => this.salvarToken(response.token))
+      tap(r => this.salvarToken(r.token))
     );
   }
 
@@ -38,19 +24,28 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/usuarios`, dados);
   }
 
-  salvarToken(token: string): void {
-    localStorage.setItem('jwt_token', token);
+  recuperarSenha(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/recuperar-senha`, { email });
   }
 
-  getToken(): string | null {
-    return localStorage.getItem('jwt_token');
+  redefinirSenha(token: string, novaSenha: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/redefinir-senha`, { token, novaSenha });
   }
 
-  isLogado(): boolean {
-    return !!this.getToken();
+  alterarSenha(dados: AlterarSenhaRequest): Observable<any> {
+    return this.http.put(`${this.apiUrl}/usuarios/me/senha`, dados);
   }
 
-  logout(): void {
-    localStorage.removeItem('jwt_token');
+  excluirConta(): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/usuarios/me`);
   }
+
+  getMeuPerfil(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/usuarios/me`);
+  }
+
+  salvarToken(token: string): void { localStorage.setItem('jwt_token', token); }
+  getToken(): string | null { return localStorage.getItem('jwt_token'); }
+  isLogado(): boolean { return !!this.getToken(); }
+  logout(): void { localStorage.removeItem('jwt_token'); }
 }

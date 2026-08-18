@@ -1,0 +1,91 @@
+<div class="page-wrapper">
+    <app-sidebar activePage="perfil" />
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Meu Perfil</h1>
+        </div>
+
+        <!-- Dados do perfil -->
+        <mat-card class="form-card" *ngIf="perfil">
+            <h3 class="form-title">Informações da Conta</h3>
+            <p class="info-line"><span class="label">Nome:</span> {{ perfil.nome }}</p>
+            <p class="info-line"><span class="label">E-mail:</span> {{ perfil.email }}</p>
+        </mat-card>
+
+        <!-- Alterar senha -->
+        <mat-card class="form-card">
+            <h3 class="form-title">Alterar Senha</h3>
+            <form [formGroup]="formSenha" (ngSubmit)="alterarSenha()">
+                <div class="campo-tlb">
+                    <label>Senha atual</label>
+                    <div class="campo-senha-wrapper">
+                        <input formControlName="senhaAtual" [type]="mostrarSenhaAtual ? 'text' : 'password'"
+                            autocomplete="current-password">
+                        <button type="button" class="btn-toggle-senha" mat-icon-button
+                            [attr.aria-label]="mostrarSenhaAtual ? 'Ocultar senha' : 'Mostrar senha'"
+                            (click)="mostrarSenhaAtual = !mostrarSenhaAtual">
+                            <mat-icon>{{ mostrarSenhaAtual ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="campo-tlb">
+                    <label>Nova senha</label>
+                    <div class="campo-senha-wrapper">
+                        <input formControlName="novaSenha" [type]="mostrarNovaSenha ? 'text' : 'password'"
+                            autocomplete="new-password">
+                        <button type="button" class="btn-toggle-senha" mat-icon-button
+                            [attr.aria-label]="mostrarNovaSenha ? 'Ocultar senha' : 'Mostrar senha'"
+                            (click)="mostrarNovaSenha = !mostrarNovaSenha">
+                            <mat-icon>{{ mostrarNovaSenha ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        </button>
+                    </div>
+                    <span class="campo-hint">Mínimo 6 caracteres</span>
+                </div>
+
+                <div class="campo-tlb">
+                    <label>Confirmar nova senha</label>
+                    <div class="campo-senha-wrapper">
+                        <input formControlName="confirmarSenha" [type]="mostrarConfirmarSenha ? 'text' : 'password'"
+                            autocomplete="new-password">
+                        <button type="button" class="btn-toggle-senha" mat-icon-button
+                            [attr.aria-label]="mostrarConfirmarSenha ? 'Ocultar senha' : 'Mostrar senha'"
+                            (click)="mostrarConfirmarSenha = !mostrarConfirmarSenha">
+                            <mat-icon>{{ mostrarConfirmarSenha ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn-outline-primario" type="submit"
+                        [disabled]="formSenha.invalid || carregandoSenha">
+                        {{ carregandoSenha ? 'Salvando...' : 'Salvar senha' }}
+                    </button>
+                </div>
+            </form>
+        </mat-card>
+
+        <!-- Excluir conta -->
+        <mat-card class="form-card danger-card">
+            <h3 class="form-title danger-title">Zona de Perigo</h3>
+            <p class="danger-desc">A exclusão da conta é permanente e não pode ser desfeita.</p>
+
+            <ng-container *ngIf="!confirmarExclusao; else confirmTemplate">
+                <button mat-stroked-button class="btn-danger" (click)="confirmarExclusao = true">
+                    <mat-icon>delete_forever</mat-icon> Excluir minha conta
+                </button>
+            </ng-container>
+
+            <ng-template #confirmTemplate>
+                <p class="confirm-text">Tem certeza? Esta ação não pode ser desfeita.</p>
+                <div class="confirm-actions">
+                    <button mat-stroked-button (click)="confirmarExclusao = false">Cancelar</button>
+                    <button mat-flat-button class="btn-danger-solid" (click)="excluirConta()">
+                        Sim, excluir conta
+                    </button>
+                </div>
+            </ng-template>
+        </mat-card>
+    </main>
+</div>

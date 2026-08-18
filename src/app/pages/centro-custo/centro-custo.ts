@@ -1,13 +1,12 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { CentroCustoService, CentroCustoDTO } from '../../services/centro-custo.service';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 
@@ -20,10 +19,9 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
     MatTableModule,
     MatIconModule,
     MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
     SidebarComponent
   ],
   templateUrl: './centro-custo.html',
@@ -33,15 +31,21 @@ export class CentroCusto implements OnInit {
   private centroCustoService = inject(CentroCustoService);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
+
+  @ViewChild('formDialog') formDialogTpl!: TemplateRef<any>;
+  @ViewChild('confirmExclusaoDialog') confirmExclusaoTpl!: TemplateRef<any>;
+  private dialogRef: MatDialogRef<any> | null = null;
+  private confirmExclusaoRef: MatDialogRef<any> | null = null;
 
   centros: CentroCustoDTO[] = [];
   carregando = true;
   salvando = false;
-  mostrarFormulario = false;
+  excluindo = false;
   editandoId: number | null = null;
   confirmarInativacaoId: number | null = null;
+  centroParaExcluir: CentroCustoDTO | null = null;
 
-  // Filtro: true = ativos, false = inativos, null = todos
   filtroAtivo: boolean | null = true;
 
   colunas = ['nome', 'status', 'acoes'];
@@ -57,10 +61,7 @@ export class CentroCusto implements OnInit {
   carregar(): void {
     this.carregando = true;
     this.centroCustoService.listar(this.filtroAtivo).subscribe({
-      next: (data) => {
-        this.centros = data;
-        this.carregando = false;
-      },
+      next: (data) => { this.centros = data; this.carregando = false; },
       error: () => {
         this.snackBar.open('Erro ao carregar centros de custo.', 'Fechar', { duration: 3000 });
         this.carregando = false;
@@ -72,25 +73,35 @@ export class CentroCusto implements OnInit {
     this.filtroAtivo = valor;
     this.fecharFormulario();
     this.confirmarInativacaoId = null;
+    this.cancelarExclusao();
     this.carregar();
   }
 
   abrirNovo(): void {
     this.editandoId = null;
     this.form.reset();
-    this.mostrarFormulario = true;
     this.confirmarInativacaoId = null;
+    this.dialogRef = this.dialog.open(this.formDialogTpl, {
+      width: '480px',
+      panelClass: 'tlb-dialog',
+      autoFocus: 'first-tabbable'
+    });
   }
 
   editar(centro: CentroCustoDTO): void {
     this.editandoId = centro.id ?? null;
     this.form.patchValue({ nome: centro.nome });
-    this.mostrarFormulario = true;
     this.confirmarInativacaoId = null;
+    this.dialogRef = this.dialog.open(this.formDialogTpl, {
+      width: '480px',
+      panelClass: 'tlb-dialog',
+      autoFocus: 'first-tabbable'
+    });
   }
 
   fecharFormulario(): void {
-    this.mostrarFormulario = false;
+    this.dialogRef?.close();
+    this.dialogRef = null;
     this.editandoId = null;
     this.form.reset();
   }
@@ -123,7 +134,6 @@ export class CentroCusto implements OnInit {
 
   pedirConfirmacaoInativacao(id: number): void {
     this.confirmarInativacaoId = id;
-    this.mostrarFormulario = false;
   }
 
   cancelarInativacao(): void {
@@ -152,6 +162,40 @@ export class CentroCusto implements OnInit {
       },
       error: () => {
         this.snackBar.open('Erro ao reativar.', 'Fechar', { duration: 3000 });
+      }
+    });
+  }
+
+  pedirConfirmacaoExclusao(centro: CentroCustoDTO): void {
+    this.centroParaExcluir = centro;
+    this.confirmExclusaoRef = this.dialog.open(this.confirmExclusaoTpl, {
+      width: '440px',
+      panelClass: 'tlb-dialog',
+      autoFocus: false
+    });
+  }
+
+  cancelarExclusao(): void {
+    this.confirmExclusaoRef?.close();
+    this.confirmExclusaoRef = null;
+    this.centroParaExcluir = null;
+  }
+
+  confirmarExclusao(): void {
+    if (!this.centroParaExcluir?.id) return;
+    this.excluindo = true;
+    this.centroCustoService.excluir(this.centroParaExcluir.id).subscribe({
+      next: () => {
+        this.snackBar.open('Excluído com sucesso!', 'Fechar', { duration: 3000 });
+        this.excluindo = false;
+        this.cancelarExclusao();
+        this.carregar();
+      },
+      error: (err) => {
+        const mensagem = err?.error?.message ?? 'Erro ao excluir.';
+        this.snackBar.open(mensagem, 'Fechar', { duration: 4000 });
+        this.excluindo = false;
+        this.cancelarExclusao();
       }
     });
   }

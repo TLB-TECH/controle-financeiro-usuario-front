@@ -1,0 +1,123 @@
+<div class="page-wrapper">
+
+  <app-sidebar activePage="cartoes"></app-sidebar>
+
+  <main class="main-content">
+
+    <div class="page-header">
+      <h1 class="page-title">Cartões de Crédito</h1>
+      <button class="btn-outline-primario" (click)="abrirNovo()">
+        <mat-icon>add</mat-icon>
+        Novo
+      </button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-card tlb-card">
+
+      @if (carregando) {
+        <div class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else if (cartoes.length === 0) {
+        <div class="empty-state">
+          <mat-icon>credit_card</mat-icon>
+          <p>Nenhum cartão cadastrado.</p>
+          <button class="btn-outline-primario" (click)="abrirNovo()">Cadastrar agora</button>
+        </div>
+      } @else {
+        <table mat-table [dataSource]="cartoes" class="cartoes-table">
+
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Nome</th>
+            <td mat-cell *matCellDef="let cartao">{{ cartao.nome }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="limite">
+            <th mat-header-cell *matHeaderCellDef>Limite</th>
+            <td mat-cell *matCellDef="let cartao">{{ formatarValor(cartao.limite) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let cartao">
+              <button mat-icon-button class="btn-edit" (click)="editar(cartao)" title="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="btn-inativar" (click)="pedirConfirmacaoExclusao(cartao)" title="Excluir">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
+        </table>
+      }
+
+    </div>
+  </main>
+</div>
+
+<!-- Dialog de criação / edição -->
+<ng-template #formDialog>
+  <div class="dialog-header">
+    <h3 class="dialog-title">{{ editandoId ? 'Editar Cartão' : 'Novo Cartão' }}</h3>
+    <button class="dialog-close-btn" (click)="fecharFormulario()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="dialog-form">
+      <div class="campo campo-avulso">
+        <label>Nome</label>
+        <input formControlName="nome" autocomplete="off" placeholder="Ex: Nubank, Inter, C6...">
+        @if (form.get('nome')?.invalid && form.get('nome')?.touched) {
+          <span class="campo-erro">Nome é obrigatório (mínimo 2 caracteres)</span>
+        }
+      </div>
+
+      <div class="campo campo-avulso">
+        <label>Limite</label>
+        <input type="text" inputmode="decimal" autocomplete="off" placeholder="0,00"
+               [value]="limiteDisplay" (input)="onLimiteInput($event)">
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="fecharFormulario()">Cancelar</button>
+    <button class="btn-outline-primario" (click)="salvar()" [disabled]="form.invalid || salvando">
+      @if (salvando) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>credit_card</mat-icon> Salvar }
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Dialog de confirmação de exclusão -->
+<ng-template #confirmExclusaoDialog>
+  <div class="dialog-header dialog-header-perigo">
+    <h3 class="dialog-title dialog-title-perigo">Excluir cartão</h3>
+    <button class="dialog-close-btn" (click)="cancelarExclusao()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div class="aviso-exclusao">
+      <mat-icon class="aviso-icon">warning</mat-icon>
+      <p>
+        Tem certeza que deseja excluir <strong>{{ cartaoParaExcluir?.nome }}</strong>?
+        Lançamentos já vinculados a este cartão permanecem no histórico, mas ele
+        deixará de aparecer nas opções ao criar novos lançamentos.
+      </p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button class="btn-cancelar" (click)="cancelarExclusao()">Cancelar</button>
+    <button class="btn-excluir-confirmar" (click)="confirmarExclusao()" [disabled]="excluindo">
+      @if (excluindo) { <mat-spinner diameter="18"></mat-spinner> } @else { Excluir }
+    </button>
+  </mat-dialog-actions>
+</ng-template>

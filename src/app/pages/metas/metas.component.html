@@ -1,0 +1,119 @@
+<div class="page-container">
+    <app-sidebar activePage="metas"></app-sidebar>
+
+    <div class="content">
+        <div class="header">
+            <h1>Metas de Aplicação</h1>
+        </div>
+
+        <div class="ano-nav">
+            <button class="ano-btn" (click)="anoAnterior()"><mat-icon>chevron_left</mat-icon></button>
+            <span class="ano-label">{{ anoSelecionado }}</span>
+            <button class="ano-btn" (click)="anoSeguinte()"><mat-icon>chevron_right</mat-icon></button>
+        </div>
+
+        <!-- Resumo -->
+        <div class="resumo-grid">
+            <div class="resumo-card">
+                <div class="resumo-icone"><mat-icon>flag</mat-icon></div>
+                <div class="resumo-info">
+                    <span class="resumo-label">Meta Anual {{ anoSelecionado }}</span>
+                    <span class="resumo-valor">{{ (metaAnualValor ?? 0) | currency:'BRL':'R$ ' }}</span>
+                </div>
+            </div>
+            <div class="resumo-card">
+                <div class="resumo-icone"><mat-icon>calculate</mat-icon></div>
+                <div class="resumo-info">
+                    <span class="resumo-label">Total Planejado no Ano</span>
+                    <span class="resumo-valor">{{ totalPlanejadoMensal | currency:'BRL':'R$ ' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meta Anual -->
+        <div class="table-card metas-card">
+            <h2 class="metas-title">Meta Anual</h2>
+            <p class="metas-descricao">Quanto você quer ter aplicado ao final de {{ anoSelecionado }}. Não precisa bater mês a mês — o que importa é a soma do ano.</p>
+
+            <div class="metas-form">
+                <div class="mes-campo campo-avulso">
+                    <label>Meta Anual (R$)</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" placeholder="0,00"
+                        [value]="metaAnualDisplay" (input)="onMetaAnualInput($event)">
+                </div>
+
+                <button class="btn-novo" (click)="salvarAnual()" [disabled]="salvandoAnual || metaAnualValor == null || metaAnualValor < 0">
+                    <mat-icon>flag</mat-icon> {{ salvandoAnual ? 'Salvando...' : 'Salvar Meta Anual' }}
+                </button>
+            </div>
+
+            <p class="metas-atualizado" *ngIf="atualizadoEmAnual">Última atualização: {{ atualizadoEmAnual | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <!-- Metas Mensais -->
+        <div class="table-card metas-card">
+            <h2 class="metas-title">Metas Mensais</h2>
+            <p class="metas-descricao">Defina um valor individual para cada mês de {{ anoSelecionado }} — eles não precisam ser iguais entre si.</p>
+
+            <div class="sugestao-box">
+                <div class="sugestao-metodo">
+                    <mat-icon>auto_awesome</mat-icon>
+                    <div class="metodo-toggle">
+                        <button type="button" class="metodo-btn" [class.ativo]="metodoSugestao === 'sobra'"
+                            (click)="onMetodoSugestaoChange('sobra')">Sobra média</button>
+                        <button type="button" class="metodo-btn" [class.ativo]="metodoSugestao === 'percentual'"
+                            (click)="onMetodoSugestaoChange('percentual')">% de um centro de custo</button>
+                    </div>
+                </div>
+
+                <div class="sugestao-parametros" *ngIf="metodoSugestao === 'percentual'">
+                    <div class="mes-campo campo-avulso campo-compacto">
+                        <label>Centro de Custo</label>
+                        <select [(ngModel)]="centroCustoSelecionadoId" (ngModelChange)="onParametroPercentualChange()" [ngModelOptions]="{standalone: true}">
+                            <option *ngFor="let c of centrosCusto" [ngValue]="c.id">{{ c.nome }}</option>
+                        </select>
+                    </div>
+                    <div class="mes-campo campo-avulso campo-compacto">
+                        <label>Percentual (%)</label>
+                        <input type="number" min="1" max="100" step="1" autocomplete="off" [(ngModel)]="percentual"
+                            (ngModelChange)="onParametroPercentualChange()" [ngModelOptions]="{standalone: true}">
+                    </div>
+                </div>
+
+                <div class="sugestao-resultado" *ngIf="sugestaoMensal !== null">
+                    <span class="sugestao-texto" *ngIf="sugestaoMensal > 0 && metodoSugestao === 'sobra'">
+                        Com base na sua média de sobra (receitas − despesas) dos últimos {{ mesesConsiderados }} {{ mesesConsiderados === 1 ? 'mês' : 'meses' }}, sugerimos <strong>{{ sugestaoMensal | currency:'BRL' }}/mês</strong>.
+                    </span>
+                    <span class="sugestao-texto" *ngIf="sugestaoMensal > 0 && metodoSugestao === 'percentual'">
+                        {{ percentual }}% da média mensal de receitas de "{{ nomeCentroCustoSelecionado() }}" nos últimos {{ mesesConsiderados }} {{ mesesConsiderados === 1 ? 'mês' : 'meses' }}: <strong>{{ sugestaoMensal | currency:'BRL' }}/mês</strong>.
+                    </span>
+                    <span class="sugestao-texto" *ngIf="sugestaoMensal === 0">
+                        Não encontramos sobra/receita suficiente no período para sugerir um valor.
+                    </span>
+
+                    <div class="mes-campo campo-avulso campo-mes-alvo" *ngIf="sugestaoMensal > 0">
+                        <label>Aplicar no mês</label>
+                        <select [(ngModel)]="mesAlvoSugestao" [ngModelOptions]="{standalone: true}">
+                            <option *ngFor="let l of mesesTabela" [ngValue]="l.mes">{{ l.nome }}</option>
+                        </select>
+                    </div>
+                    <button class="btn-sugestao" (click)="usarSugestao()" *ngIf="sugestaoMensal > 0">Usar sugestão</button>
+                </div>
+
+                <p class="sugestao-vazio" *ngIf="sugestaoMensal === null">Sem lançamentos suficientes no período para gerar uma sugestão.</p>
+            </div>
+
+            <div class="meses-grid">
+                <div class="mes-campo" *ngFor="let l of mesesTabela">
+                    <label>{{ l.nome }}</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" placeholder="0,00"
+                        [value]="formatarMoedaDisplay(l.valor)" (input)="onMesInput($event, l)">
+                </div>
+            </div>
+
+            <button class="btn-novo btn-salvar-mensal" (click)="salvarMensal()" [disabled]="salvandoMensal">
+                <mat-icon>savings</mat-icon> {{ salvandoMensal ? 'Salvando...' : 'Salvar Metas Mensais' }}
+            </button>
+        </div>
+    </div>
+</div>
